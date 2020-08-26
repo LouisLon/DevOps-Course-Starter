@@ -7,25 +7,29 @@
     <p class="lead">Just another to-do app.</p>
   </div>
 
+  <div class="container">
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-lg-12">
       <h2>Items</h2>
-      <ul class="list-group mb-4">
+      <ul class="list-group mb-6">
         <!-- List the todo items here -->
         {% for item in todoitems %}
         <li>
         {%if item.status=='Not Started'%}
-          {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}">Remove Item</a> <a href="/{{ item.id }}">Complete Item</a>
+          {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}"><i class="fas fa-trash-alt"></i></a> <a href="/{{ item.id }}"><i class="far fa-calendar-plus"></i></a>
         {%else%}
-           {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}">Remove Item</a>
+           {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}"><i class="fas fa-trash-alt"></i></a>
         {% endif %}    
         </li>
         {% endfor %}
       </ul>
     </div>
     <form action="/" method="post">
-      <input type="text" name="title">
-      <input type="submit" value="Add Item">
+      <div class="form-group">
+      <input type="text" name="title" class="form-control form-control-lg">
+    </div>
+      <input type="submit" value="Add Item" class="btn btn-primary">
     </form>
   </div>
+</div>
 {% endblock %}

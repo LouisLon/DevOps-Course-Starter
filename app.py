@@ -7,23 +7,23 @@ app.config.from_object('flask_config.Config')
 @app.route('/')
 def index():    
     items = session.get_items()
-    return  render_template("index.html",todoitems=items)#'Hello World!'
+    return  render_template("index.html",todoitems=items)
 
 if __name__ == '__main__':
     app.run()
 
 @app.route('/', methods=['POST'])
 def add_item():   
-    strtitle = request.form.get('title')#request.form['title']  
-    if strtitle!='':
-        session.add_item(strtitle)
+    title = request.form.get('title') 
+    if title!='':
+        session.add_item(title)
     return redirect('/')
     
 @app.route('/<id>')
 def complete_item(id):   
-    strlist=session.get_item(id)
-    strlist['status']="Completed"
-    session.save_item(strlist)    
+    item=session.get_item(id)
+    item['status'] = "Completed"
+    session.save_item(item)    
     return redirect('/')  
 
 @app.route('/remove/<id>')
