@@ -21,9 +21,10 @@ def add_item():
     
 @app.route('/<id>')
 def complete_item(id):   
-    item=session.get_item(id)
-    item['status'] = "Completed"
-    session.save_item(item)    
+    if(id.isnumeric()):
+        item=session.get_item(id)
+        item['status'] = "Completed"
+        session.save_item(item)    
     return redirect('/')  
 
 @app.route('/remove/<id>')

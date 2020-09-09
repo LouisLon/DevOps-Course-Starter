@@ -1,6 +1,8 @@
 from flask import session
 from collections import OrderedDict
 
+import requests, os
+
 _DEFAULT_ITEMS = [
     { 'id': 1, 'status': 'Not Started', 'title': 'List saved todo items' },
     { 'id': 2, 'status': 'Not Started', 'title': 'Allow new items to be added' }
@@ -14,7 +16,44 @@ def get_items():
     Returns:
         list: The list of saved items.
     """   
-    sorted_default_items=sort_items(_DEFAULT_ITEMS)
+    # #Get Boards
+    boards = {}        
+    r = requests.get('https://api.trello.com/1/members/me/boards?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    if r.status_code == 200:
+        jsonResponse = r.json()           
+        boards["id"] = jsonResponse[0]['id']
+        boards["name"]  = jsonResponse[0]['name']
+    
+    # #Get Board list
+    board_lists = []    
+    board_list = {}  
+    r = requests.get('https://api.trello.com/1/boards/'+boards["id"]+'/lists?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    if r.status_code == 200:
+        jsonResponse = r.json()  
+        for json_item in jsonResponse:            
+            board_list["id"] = json_item['id']
+            board_list["name"]  = json_item['name']            
+            board_lists.append(board_list.copy())  
+            
+
+    active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
+    session['active_board_list']=active_board_list["id"]
+
+    #Get cards in the list
+    card_lists = []    
+    card_list = {}  
+    r = requests.get('https://api.trello.com/1/lists/'+active_board_list["id"]+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    if r.status_code == 200:
+        jsonResponse = r.json()  
+        for json_item in jsonResponse:            
+            card_list["id"] = json_item['id']
+            card_list["title"]  = json_item['name']
+            card_list["status"]  = 'Not Started'
+            card_lists.append(card_list.copy())  
+
+
+    #sorted_default_items=sort_items(_DEFAULT_ITEMS)
+    sorted_default_items=sort_items(card_lists)
     return session.get('items', sorted_default_items)
 
 
@@ -42,14 +81,36 @@ def add_item(title):
     Returns:
         item: The saved item.
     """
+    #Create a new Card
+    
+    url = "https://api.trello.com/1/cards"
+
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN'),
+    'idList': session['active_board_list'],
+    'name': title
+    }
+
+    r = requests.request(
+    "POST",
+    url,
+    params=query
+    )
+    
+    if r.status_code == 200:
+        jsonResponse = r.json()           
+        id = jsonResponse['id']
+
     items = get_items()
 
     # Determine the ID for the item based on that of the previously added item
-    id = len(items) + 1 if items else 0
-    item = { 'id': id, 'title': title, 'status': 'Not Started' }
+    #id = len(items) + 1 if items else 0
+   
+   # item = { 'id': id, 'title': title, 'status': 'Not Started' }
 
     # Add the item to the list
-    items.append(item)    
+    #items.append(item)    
     session['items'] = sort_items(items)
 
     return item
