@@ -9,13 +9,16 @@ _DEFAULT_ITEMS = [
 ]
 
 
-def get_items():
+def get_items(use_session=False):
     """
     Fetches all saved items from the session.
 
     Returns:
-        list: The list of saved items.
+        list: The list of saved items.    
     """   
+    if(use_session):
+        return session['items']
+
     # #Get Boards
     boards = {}        
     r = requests.get('https://api.trello.com/1/members/me/boards?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
@@ -37,24 +40,32 @@ def get_items():
             
 
     active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
+    statuscomplete_list = next((board_list for board_list in board_lists if board_list['name'] == "Done"), None)
     session['active_board_list']=active_board_list["id"]
+    session['statuscomplete_list']=statuscomplete_list["id"]
 
     #Get cards in the list
     card_lists = []    
     card_list = {}  
-    r = requests.get('https://api.trello.com/1/lists/'+active_board_list["id"]+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    
+    r = requests.get('https://api.trello.com/1/boards/'+boards["id"]+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
     if r.status_code == 200:
         jsonResponse = r.json()  
         for json_item in jsonResponse:            
             card_list["id"] = json_item['id']
             card_list["title"]  = json_item['name']
-            card_list["status"]  = 'Not Started'
+            if(session['statuscomplete_list']!=json_item['idList']):
+                card_list["status"]  = 'Not Started'
+            else:
+                card_list["status"]  = 'Done'
             card_lists.append(card_list.copy())  
 
 
     #sorted_default_items=sort_items(_DEFAULT_ITEMS)
     sorted_default_items=sort_items(card_lists)
-    return session.get('items', sorted_default_items)
+    #session_items=session.get('items', sorted_default_items)
+    session['items']=sorted_default_items
+    return sorted_default_items
 
 
 def get_item(id):
@@ -67,8 +78,8 @@ def get_item(id):
     Returns:
         item: The saved item, or None if no items match the specified ID.
     """
-    items = get_items()
-    return next((item for item in items if item['id'] == int(id)), None)
+    items = get_items(True)
+    return next((item for item in items if item['id'] == id), None)
 
 
 def add_item(title):
@@ -102,12 +113,12 @@ def add_item(title):
         jsonResponse = r.json()           
         id = jsonResponse['id']
 
-    items = get_items()
+    items = get_items(False)
 
     # Determine the ID for the item based on that of the previously added item
     #id = len(items) + 1 if items else 0
    
-   # item = { 'id': id, 'title': title, 'status': 'Not Started' }
+    item = { 'id': id, 'title': title, 'status': 'Not Started' }
 
     # Add the item to the list
     #items.append(item)    
@@ -123,7 +134,35 @@ def save_item(item):
     Args:
         item: The item to save.
     """
-    existing_items = get_items()
+    url = "https://api.trello.com/1/cards/"+item['id']
+
+    headers = {
+    "Accept": "application/json"
+    }
+
+    idlist=session['statuscomplete_list']
+    if(item['status'] == "Not Started"):
+        idlist=session['active_board_list']
+
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN'),
+    'idList': idlist  #move card
+    }
+
+    r = requests.request(
+    "PUT",
+    url,
+    headers=headers,
+    params=query
+    )
+    
+    if r.status_code == 200:
+        jsonResponse = r.json()           
+        id = jsonResponse['id']
+    
+  
+    existing_items = get_items(True)    
     updated_items = [item if item['id'] == existing_item['id'] else existing_item for existing_item in existing_items]    
     session['items'] = sort_items(updated_items)
 
@@ -140,7 +179,7 @@ def remove_item(id):
     Args:
         item: The item id to remove.
     """
-    items = get_items()
+    items = get_items(False)
 
     item = get_item(id)
 

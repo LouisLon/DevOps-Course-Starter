@@ -6,7 +6,7 @@ app.config.from_object('flask_config.Config')
 
 @app.route('/')
 def index():    
-    items = session.get_items()
+    items = session.get_items(False)
     return  render_template("index.html",todoitems=items)
 
 if __name__ == '__main__':
@@ -21,11 +21,19 @@ def add_item():
     
 @app.route('/<id>')
 def complete_item(id):   
-    if(id.isnumeric()):
+    if(id!="favicon.ico"):
         item=session.get_item(id)
         item['status'] = "Completed"
         session.save_item(item)    
     return redirect('/')  
+
+@app.route('/todo/<id>')
+def uncomplete_item(id):   
+    if(id!="favicon.ico"):
+        item=session.get_item(id)
+        item['status'] = "Not Started"
+        session.save_item(item)    
+    return redirect('/') 
 
 @app.route('/remove/<id>')
 def delete_item(id):   
