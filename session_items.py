@@ -20,24 +20,11 @@ def get_items(use_session=False):
         return session['items']
 
     # #Get Boards
-    boards = {}        
-    r = requests.get('https://api.trello.com/1/members/me/boards?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
-    if r.status_code == 200:
-        jsonResponse = r.json()           
-        boards["id"] = jsonResponse[0]['id']
-        boards["name"]  = jsonResponse[0]['name']
-    
+    boards = get_board_details()     
+        
     # #Get Board list
-    board_lists = []    
-    board_list = {}  
-    r = requests.get('https://api.trello.com/1/boards/'+boards["id"]+'/lists?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
-    if r.status_code == 200:
-        jsonResponse = r.json()  
-        for json_item in jsonResponse:            
-            board_list["id"] = json_item['id']
-            board_list["name"]  = json_item['name']            
-            board_lists.append(board_list.copy())  
-            
+    board_lists=get_listinboard(boards["id"])
+          
 
     active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
     statuscomplete_list = next((board_list for board_list in board_lists if board_list['name'] == "Done"), None)
@@ -45,10 +32,40 @@ def get_items(use_session=False):
     session['statuscomplete_list']=statuscomplete_list["id"]
 
     #Get cards in the list
+    card_lists=get_cardsinboard(boards["id"])
+  
+    #sorted_default_items=sort_items(_DEFAULT_ITEMS)
+    sorted_default_items=sort_items(card_lists)
+    #session_items=session.get('items', sorted_default_items)
+    session['items']=sorted_default_items
+    return sorted_default_items
+
+def get_board_details():
+    boards = {}        
+    r = requests.get('https://api.trello.com/1/members/me/boards?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    if r.status_code == 200:
+        jsonResponse = r.json()           
+        boards["id"] = jsonResponse[0]['id']
+        boards["name"]  = jsonResponse[0]['name']
+    return boards
+
+def get_listinboard(board_id):
+    board_lists = []    
+    board_list = {}  
+    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/lists?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    if r.status_code == 200:
+        jsonResponse = r.json()  
+        for json_item in jsonResponse:            
+            board_list["id"] = json_item['id']
+            board_list["name"]  = json_item['name']            
+            board_lists.append(board_list.copy()) 
+    return board_lists
+
+def get_cardsinboard(board_id):
     card_lists = []    
     card_list = {}  
-    
-    r = requests.get('https://api.trello.com/1/boards/'+boards["id"]+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+        
+    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
     if r.status_code == 200:
         jsonResponse = r.json()  
         for json_item in jsonResponse:            
@@ -59,14 +76,7 @@ def get_items(use_session=False):
             else:
                 card_list["status"]  = 'Done'
             card_lists.append(card_list.copy())  
-
-
-    #sorted_default_items=sort_items(_DEFAULT_ITEMS)
-    sorted_default_items=sort_items(card_lists)
-    #session_items=session.get('items', sorted_default_items)
-    session['items']=sorted_default_items
-    return sorted_default_items
-
+    return card_lists
 
 def get_item(id):
     """
@@ -179,6 +189,13 @@ def remove_item(id):
     Args:
         item: The item id to remove.
     """
+    url = "https://api.trello.com/1/cards/"+id
+
+    response = requests.request(
+    "DELETE",
+    url
+    )
+
     items = get_items(False)
 
     item = get_item(id)
