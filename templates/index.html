@@ -16,11 +16,11 @@
         {% for item in todoitems %}
         <li>
         {%if item.status=='Not Started'%}
-          {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}"><i class="fas fa-trash-alt"></i></a> <a href="/{{ item.id }}"><i class="far fa-calendar-plus"></i></a>
+          {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="/{{ item.id }}" class="btn btn-success btn-sm m-1" role="button" aria-pressed="true">Done</a></li>
         {%else%}
-           {{item.title}} - {{item.status}} <a href="/remove/{{ item.id }}"><i class="fas fa-trash-alt"></i></a>
+           {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="{{url_for('uncomplete_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">To Do</a></li>
         {% endif %}    
-        </li>
+        
         {% endfor %}
       </ul>
     </div>

@@ -5,9 +5,14 @@ app = Flask(__name__)
 app.config.from_object('flask_config.Config')
 
 @app.route('/')
-def index():    
-    items = session.get_items()
-    return  render_template("index.html",todoitems=items)
+def index():  
+    try:  
+        items = session.get_items()
+        return  render_template("index.html",todoitems=items)
+    except Exception as e:
+        return e.message
+    finally:
+        print("loaded home page")
 
 if __name__ == '__main__':
     app.run()
@@ -21,10 +26,19 @@ def add_item():
     
 @app.route('/<id>')
 def complete_item(id):   
-    item=session.get_item(id)
-    item['status'] = "Completed"
-    session.save_item(item)    
+    if(id!="favicon.ico"):
+        item=session.get_item(id)
+        item['status'] = "Completed"
+        session.save_item(item)    
     return redirect('/')  
+
+@app.route('/todo/<id>')
+def uncomplete_item(id):   
+    if(id!="favicon.ico"):
+        item=session.get_item(id)
+        item['status'] = "Not Started"
+        session.save_item(item)    
+    return redirect('/') 
 
 @app.route('/remove/<id>')
 def delete_item(id):   
