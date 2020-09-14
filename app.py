@@ -5,9 +5,14 @@ app = Flask(__name__)
 app.config.from_object('flask_config.Config')
 
 @app.route('/')
-def index():    
-    items = session.get_items(False)
-    return  render_template("index.html",todoitems=items)
+def index():  
+    try:  
+        items = session.get_items()
+        return  render_template("index.html",todoitems=items)
+    except Exception as e:
+        return e.message
+    finally:
+        print("loaded home page")
 
 if __name__ == '__main__':
     app.run()

@@ -3,21 +3,31 @@ from collections import OrderedDict
 
 import requests, os
 
-_DEFAULT_ITEMS = [
-    { 'id': 1, 'status': 'Not Started', 'title': 'List saved todo items' },
-    { 'id': 2, 'status': 'Not Started', 'title': 'Allow new items to be added' }
-]
+class CustomError(Exception):
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+
+    def __str__(self):
+        #print('calling str')
+        if self.message:
+            return 'CustomError, {0} '.format(self.message)
+        else:
+            return 'CustomError has been raised'
 
 
-def get_items(use_session=False):
+def get_items():
     """
     Fetches all saved items from the session.
 
     Returns:
         list: The list of saved items.    
     """   
-    if(use_session):
-        return session['items']
+    
+    # if(use_session):
+    #     return session['items']
 
     # #Get Boards
     boards = get_board_details()     
@@ -37,35 +47,62 @@ def get_items(use_session=False):
     #sorted_default_items=sort_items(_DEFAULT_ITEMS)
     sorted_default_items=sort_items(card_lists)
     #session_items=session.get('items', sorted_default_items)
-    session['items']=sorted_default_items
+    #session['items']=sorted_default_items
     return sorted_default_items
 
 def get_board_details():
-    boards = {}        
-    r = requests.get('https://api.trello.com/1/members/me/boards?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    
+    boardname='todo items'
+    url="https://api.trello.com/1/search"
+
+    headers = {
+    "Accept": "application/json"
+    }
+
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN'),  
+    'query' : 'name:"'+boardname+'"',    
+    'modelTypes' : 'boards',
+    'board_fields' : '"name"'
+    }
+
+    r = requests.request(
+    "GET",
+    url,
+    headers=headers,
+    params=query
+    )
+
     if r.status_code == 200:
-        jsonResponse = r.json()           
-        boards["id"] = jsonResponse[0]['id']
-        boards["name"]  = jsonResponse[0]['name']
-    return boards
+        jsonResponse = r.json()
+        return {
+        "id": jsonResponse["boards"][0]["id"],
+        "name": boardname,
+        }
+    else:        
+        raise CustomError('Error finding a Trello board')
+   
 
 def get_listinboard(board_id):
-    board_lists = []    
-    board_list = {}  
-    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/lists?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    board_lists = []   
+     
+    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/lists', params={'key': os.getenv('TRELLO_KEY'), 'token': os.getenv('TRELLO_TOKEN')})
     if r.status_code == 200:
         jsonResponse = r.json()  
-        for json_item in jsonResponse:            
-            board_list["id"] = json_item['id']
-            board_list["name"]  = json_item['name']            
-            board_lists.append(board_list.copy()) 
+        for json_item in jsonResponse:
+            board_lists.append({
+            "id": json_item["id"],
+            "name": json_item["name"],
+            })
+    else:        
+        raise CustomError('Error finding a Trello List')
     return board_lists
 
 def get_cardsinboard(board_id):
     card_lists = []    
     card_list = {}  
-        
-    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/cards/?key='+os.getenv('TRELLO_KEY')+'&token='+os.getenv('TRELLO_TOKEN'))
+    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/cards', params={'key': os.getenv('TRELLO_KEY'), 'token': os.getenv('TRELLO_TOKEN')})
     if r.status_code == 200:
         jsonResponse = r.json()  
         for json_item in jsonResponse:            
@@ -76,6 +113,8 @@ def get_cardsinboard(board_id):
             else:
                 card_list["status"]  = 'Done'
             card_lists.append(card_list.copy())  
+    else:        
+        raise CustomError('Error finding Trello Cards')
     return card_lists
 
 def get_item(id):
@@ -88,7 +127,7 @@ def get_item(id):
     Returns:
         item: The saved item, or None if no items match the specified ID.
     """
-    items = get_items(True)
+    items = get_items()
     return next((item for item in items if item['id'] == id), None)
 
 
@@ -122,8 +161,10 @@ def add_item(title):
     if r.status_code == 200:
         jsonResponse = r.json()           
         id = jsonResponse['id']
+    else:        
+        raise CustomError('Error finding deleting Trello card '+title)
 
-    items = get_items(False)
+    items = get_items()
 
     # Determine the ID for the item based on that of the previously added item
     #id = len(items) + 1 if items else 0
@@ -132,7 +173,7 @@ def add_item(title):
 
     # Add the item to the list
     #items.append(item)    
-    session['items'] = sort_items(items)
+    #session['items'] = sort_items(items)
 
     return item
 
@@ -170,11 +211,13 @@ def save_item(item):
     if r.status_code == 200:
         jsonResponse = r.json()           
         id = jsonResponse['id']
+    else:        
+        raise CustomError('Error finding updating Trello card '+item["title"])
     
   
-    existing_items = get_items(True)    
+    existing_items = get_items()    
     updated_items = [item if item['id'] == existing_item['id'] else existing_item for existing_item in existing_items]    
-    session['items'] = sort_items(updated_items)
+    #session['items'] = sort_items(updated_items)
 
     return item
 
@@ -191,21 +234,23 @@ def remove_item(id):
     """
     url = "https://api.trello.com/1/cards/"+id
 
-    response = requests.request(
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN')   
+    }
+
+    r = requests.request(
     "DELETE",
-    url
+    url,
+    params=query
     )
 
-    items = get_items(False)
+    items = get_items()
 
-    item = get_item(id)
+    # Add the item to the list      
+    #session['items'] = sort_items(items)
 
-    # Add the item to the list
-    items.remove(item)    
-    session['items'] = sort_items(items)
-
-
-    return item
+    return id
 
 def sort_items(list_items):
     list_items= sorted(list_items,key=lambda item: (item['status'],item['title']))
