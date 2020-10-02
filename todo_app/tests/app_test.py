@@ -1,6 +1,6 @@
-# import pytest
-# from session_items import ViewModel
-# from datetime import datetime
+import pytest
+from session_items import ViewModel
+from datetime import datetime
 # from dotenv import load_dotenv, find_dotenv
 # #import app
 # from flask import Flask, render_template, request, redirect, url_for
@@ -13,7 +13,8 @@ def test_isupper():
     assert 'FOO'.isupper()
     assert not 'Foo'.isupper()
 
-#@pytest.fixture
+    
+@pytest.fixture
 def trello_items():
     items=[{'dateLastActivity': '01-10-2020', 'id': '5f75c7b4f473030a20a30224', 'status': 'Doing', 'title': 'Staying at home'}, {'dateLastActivity': '10-09-2020', 'id': '5f58c9c6bf4667146a017e32', 'status': 'Done', 'title': 'Book my holiday'}, {'dateLastActivity': '14-09-2020', 'id': '5f5902cd7bdb1e12c8061d9a', 'status': 'Done', 'title': 'Fix Alicia book'}, {'dateLastActivity': '14-09-2020', 'id': '5f58c9c619f4fe1505e7290e', 'status': 'Not Started', 'title': 'Buy some clothes'}, {'dateLastActivity': '10-09-2020', 'id': '5f590331c1c56168a4cfe96b', 'status': 'Not Started', 'title': 'Fix Alicia book again'}, {'dateLastActivity': '09-09-2020', 'id': '5f58c9c64f6452685d239aaa', 'status': 'Not Started', 'title': 'Go for daily walks'}]
     return items
