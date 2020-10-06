@@ -42,6 +42,15 @@ def create_app():
             item['status'] = "Not Started"
             session.save_item(item)    
         return redirect('/') 
+    
+    @app.route('/doing/<id>')
+    def start_item(id):   
+        if(id!="favicon.ico"):
+            item=session.get_item(id)
+            item['status'] = "Doing"
+            session.save_item(item)    
+        return redirect('/') 
+    
 
     @app.route('/remove/<id>')
     def delete_item(id):   
