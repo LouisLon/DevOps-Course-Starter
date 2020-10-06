@@ -303,3 +303,42 @@ def remove_item(id):
 def sort_items(list_items):
     list_items= sorted(list_items,key=lambda item: (item['status'],item['title']))
     return list_items
+
+def create_trello_board():
+    url = "https://api.trello.com/1/boards/"
+
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN'),
+    'name': "To Service"
+    }
+
+    response = requests.request(
+    "POST",
+    url,
+    params=query
+    )
+    
+    board_id=response.json()["id"]
+    #print(response.text)      
+
+    return board_id
+
+
+def delete_trello_board(board_id):
+    url = "https://api.trello.com/1/boards/"+board_id
+
+    query = {
+    'key': os.getenv('TRELLO_KEY'),
+    'token': os.getenv('TRELLO_TOKEN')
+    }
+
+    response = requests.request(
+    "DELETE",
+    url,
+    params=query
+    )
+
+   # print(response.text)     
+
+    return (response.status_code==200)

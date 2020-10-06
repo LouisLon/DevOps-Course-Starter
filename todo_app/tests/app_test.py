@@ -6,7 +6,6 @@ from dotenv import load_dotenv, find_dotenv
 import requests_mock
 import requests
 
-import http.client
 
 # def test_split():
 #     s = 'hello world'
@@ -97,7 +96,6 @@ def test_index_page(requests_mock,client):
     requests_mock.get('https://api.trello.com/1/boards/5f58c9c553d5e50e89e24311/cards', text=cardsinboard_data)
     
     assert 'Book my holiday' in client.get('/').data.decode("utf-8") 
-
 
 # def test_cant_add_number_to_string():
 #     text = 'a'
