@@ -50,3 +50,18 @@ You should see output similar to the following:
  * Debugger PIN: 226-556-590
 ```
 Now visit [`http://localhost:5000/`](http://localhost:5000/) in your web browser to view the app.
+
+Notes
+The .env file is used by flask to set environment variables when running flask run. This enables things like developement mode (which also enables features like hot reloading when you make a file change).
+
+There's also a SECRET_KEY variable which is used to encrypt the flask session cookie.
+The application requires a trello secret key and token for the variables [TRELLO_KEY] [TRELLO_TOKEN] When running setup.sh, the .env.template file will be copied to .env if the latter does not exist.
+
+Running the Test
+The file app_test.py and app_e2e_test.py has the unit test and integration test code
+This can be run with test explorer or pytest
+
+You can install pytest via pip
+$ pip install pytest
+To run pytest, simply run the following command from the root of your project.
+$ pytest
