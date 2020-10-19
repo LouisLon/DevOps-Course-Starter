@@ -6,14 +6,6 @@ from dotenv import load_dotenv, find_dotenv
 import requests_mock
 import requests
 
-
-# def test_split():
-#     s = 'hello world'
-#     assert s.split() == ['hello', 'world']
-#     # check that s.split fails when the separator is not    a string
-#     with pytest.raises(TypeError):
-#         s.split(2)
-
 @pytest.fixture
 def trello_items():
     items=[{'dateLastActivity': '01-10-2020', 'id': '5f75c7b4f473030a20a30224', 'status': 'Doing', 'title': 'Staying at home'}, {'dateLastActivity': '10-09-2020', 'id': '5f58c9c6bf4667146a017e32', 'status': 'Done', 'title': 'Book my holiday'}, {'dateLastActivity': '14-09-2020', 'id': '5f5902cd7bdb1e12c8061d9a', 'status': 'Done', 'title': 'Fix Alicia book'}, {'dateLastActivity': '14-09-2020', 'id': '5f58c9c619f4fe1505e7290e', 'status': 'Not Started', 'title': 'Buy some clothes'}, {'dateLastActivity': '10-09-2020', 'id': '5f590331c1c56168a4cfe96b', 'status': 'Not Started', 'title': 'Fix Alicia book again'}, {'dateLastActivity': '09-09-2020', 'id': '5f58c9c64f6452685d239aaa', 'status': 'Not Started', 'title': 'Go for daily walks'}]
@@ -96,18 +88,3 @@ def test_index_page(requests_mock,client):
     requests_mock.get('https://api.trello.com/1/boards/5f58c9c553d5e50e89e24311/cards', text=cardsinboard_data)
     
     assert 'Book my holiday' in client.get('/').data.decode("utf-8") 
-
-# def test_cant_add_number_to_string():
-#     text = 'a'
-#     number = 3
-#     with pytest.raises(TypeError):
-#         text + number
-
-# @pytest.mark.parametrize("test_input, expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
-# def test_eval(test_input, expected):
-#     assert eval(test_input) == expected
-
-# @pytest.mark.parametrize("number",range(100,150))
-# def test_is_even(number):
-#     result = number%5
-#     assert result ==0

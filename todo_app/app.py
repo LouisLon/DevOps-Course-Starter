@@ -1,16 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for
 import todo_app.data.session_items as session
-from todo_app.flask_config import Config
+#from todo_app.flask_config import Config
 import requests
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    #app.config.from_object(Config)
     # All the routes and setup code etc
 
     @app.route('/')
     def index():  
-        try:        
-            #return "hello"              
+        try:       
             items = session.get_items()
             item_view_model = session.ViewModel(items)
             return render_template('index.html',view_model=item_view_model)
@@ -55,21 +54,10 @@ def create_app():
     @app.route('/remove/<id>')
     def delete_item(id):   
         session.remove_item(id)           
-        return redirect('/')  
-
-    @app.route('/clear')
-    def reinitialize_list():
-        session.clear_items()
-        return redirect('/')  
+        return redirect('/')    
 
 
     return app
-
-# app=create_app()
-# #print(app.config)
-# print(f"Environment: {app.config['ENV']}")
-# print(f"Debug: {app.config['DEBUG']}")
-# print(f"Secret key: {app.config['SECRET_KEY']}")
 
 if __name__ == '__main__':
     create_app().run()

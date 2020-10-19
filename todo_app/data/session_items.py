@@ -1,4 +1,3 @@
-from flask import session
 from collections import OrderedDict
 
 import requests, os
@@ -11,8 +10,7 @@ class CustomError(Exception):
         else:
             self.message = None
 
-    def __str__(self):
-        #print('calling str')
+    def __str__(self):        
         if self.message:
             return 'CustomError, {0} '.format(self.message)
         else:
@@ -66,9 +64,6 @@ def get_items():
         list: The list of saved items.    
     """   
     
-    # if(use_session):
-    #     return session['items']
-
     # #Get Boards
     boards = get_board_details()     
         
@@ -79,17 +74,12 @@ def get_items():
     active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
     doing_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Doing"), None)
     statuscomplete_list = next((board_list for board_list in board_lists if board_list['name'] == "Done"), None)
-    session['active_board_list']=active_board_list["id"]
-    session['doing_board_list']=doing_board_list["id"]
-    session['statuscomplete_list']=statuscomplete_list["id"]
 
     #Get cards in the list
-    card_lists=get_cardsinboard(boards["id"])
-  
-    #sorted_default_items=sort_items(_DEFAULT_ITEMS)
+    card_lists=get_cardsinboard(boards["id"],active_board_list["id"],doing_board_list["id"],statuscomplete_list["id"])
+ 
     sorted_default_items=sort_items(card_lists)
-    #session_items=session.get('items', sorted_default_items)
-    #session['items']=sorted_default_items
+
     return sorted_default_items
 
 def get_board_details():
@@ -141,7 +131,7 @@ def get_listinboard(board_id):
         raise CustomError('Error finding a Trello List')
     return board_lists
 
-def get_cardsinboard(board_id):
+def get_cardsinboard(board_id,active_status_id,doing_status_id,complete_status_id):
     card_lists = []    
     card_list = {}  
     r = requests.get('https://api.trello.com/1/boards/'+board_id+'/cards', params={'key': os.getenv('TRELLO_KEY'), 'token': os.getenv('TRELLO_TOKEN')})
@@ -151,10 +141,13 @@ def get_cardsinboard(board_id):
             card_list["id"] = json_item['id']
             card_list["title"]  = json_item['name']
             card_list["dateLastActivity"]  = datetime.strptime(json_item['dateLastActivity'].split('T')[0], "%Y-%m-%d").strftime('%d-%m-%Y')
-            
-            if(session['active_board_list']==json_item['idList']):
+            card_list["active_list_id"]  = active_status_id
+            card_list["doing_list_id"]  = doing_status_id
+            card_list["complete_list_id"]  = complete_status_id
+
+            if(active_status_id==json_item['idList']):
                 card_list["status"]  = 'Not Started'
-            elif (session['doing_board_list']==json_item['idList']):
+            elif (doing_status_id==json_item['idList']):
                 card_list["status"]  = 'Doing'
             else:
                 card_list["status"]  = 'Done'
@@ -187,6 +180,15 @@ def add_item(title):
     Returns:
         item: The saved item.
     """
+    # #Get Boards
+    boards = get_board_details()     
+        
+    # #Get Board list
+    board_lists=get_listinboard(boards["id"])
+          
+
+    active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
+
     #Create a new Card
     
     url = "https://api.trello.com/1/cards"
@@ -194,7 +196,7 @@ def add_item(title):
     query = {
     'key': os.getenv('TRELLO_KEY'),
     'token': os.getenv('TRELLO_TOKEN'),
-    'idList': session['active_board_list'],
+    'idList': active_board_list["id"],
     'name': title
     }
 
@@ -237,11 +239,11 @@ def save_item(item):
     "Accept": "application/json"
     }
 
-    idlist=session['statuscomplete_list']
+    idlist=item["complete_list_id"]
     if(item['status'] == "Not Started"):
-        idlist=session['active_board_list']
+        idlist=item["active_list_id"]
     elif(item['status'] == "Doing"):
-        idlist=session['doing_board_list']
+        idlist=item["doing_list_id"]
 
     query = {
     'key': os.getenv('TRELLO_KEY'),
@@ -268,10 +270,6 @@ def save_item(item):
     #session['items'] = sort_items(updated_items)
 
     return item
-
-def clear_items():
-    session.pop('items', None)
-    return session.get('items', _DEFAULT_ITEMS)
 
 def remove_item(id):
     """
