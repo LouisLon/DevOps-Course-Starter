@@ -304,21 +304,27 @@ def sort_items(list_items):
 
 def create_trello_board():
     url = "https://api.trello.com/1/boards/"
-
+    
     query = {
     'key': os.getenv('TRELLO_KEY'),
     'token': os.getenv('TRELLO_TOKEN'),
     'name': "To Service"
     }
-
+    
     response = requests.request(
     "POST",
     url,
     params=query
     )
-    
-    board_id=response.json()["id"]
-    #print(response.text)      
+    #print(response.status_code)
+    #print(response.text)   
+    if response.status_code == 200:
+        jsonResponse = response.json()           
+        board_id = jsonResponse['id']
+    else:        
+        raise CustomError('Error finding creating board "To Service" - '+str(response.status_code)+' - '+response.text)
+   
+       
 
     return board_id
 

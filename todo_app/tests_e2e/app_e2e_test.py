@@ -10,11 +10,11 @@ from selenium.webdriver.common.by import By
 
 @pytest.fixture(scope='module')
 def test_app():
-# Create the new board & update the board id environment variable
-    board_id = session.create_trello_board()
-    os.environ['TRELLO_BOARD_ID'] = board_id
+# Create the new board & update the board id environment variable    
     file_path = find_dotenv('.env')
     load_dotenv(file_path, override=True)
+    board_id = session.create_trello_board()
+    os.environ['TRELLO_BOARD_ID'] = board_id
     # construct the new application
     application = app.create_app()
     # start the app in its own thread.
@@ -41,18 +41,6 @@ def test_app_driver():
     # Tear Down
     thread.join(1)
    
-
-# def test_board(test_app):
-#     assert os.environ['TRELLO_BOARD_ID']!=None
-
-# def test_split():
-#     s = 'hello world'
-#     assert s.split() == ['hello', 'world']
-#     # check that s.split fails when the separator is not    a string
-#     with pytest.raises(TypeError):
-#         s.split(2)
-
-
 
 @pytest.fixture(scope="module")
 def driver():

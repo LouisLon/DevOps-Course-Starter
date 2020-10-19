@@ -8,16 +8,11 @@ def create_app():
     # All the routes and setup code etc
 
     @app.route('/')
-    def index():  
-        try:       
-            items = session.get_items()
-            item_view_model = session.ViewModel(items)
-            return render_template('index.html',view_model=item_view_model)
-            
-        except Exception as e:
-            return str(e)
-        finally:
-            print("loaded home page")
+    def index():             
+        items = session.get_items()
+        item_view_model = session.ViewModel(items)
+        return render_template('index.html',view_model=item_view_model)
+                   
 
     @app.route('/', methods=['POST'])
     def add_item():   
