@@ -24,23 +24,7 @@ def test_app():
     yield app
     # Tear Down
     thread.join(1)
-    session.delete_trello_board(board_id)
-
-@pytest.fixture(scope='module')
-def test_app_driver():
-
-    file_path = find_dotenv('.env')
-    load_dotenv(file_path, override=True)
-    # construct the new application
-    application = app.create_app()
-    # start the app in its own thread.
-    thread = Thread(target=lambda: application.run(use_reloader=False))
-    thread.daemon = True
-    thread.start()
-    yield app
-    # Tear Down
-    thread.join(1)
-   
+    #session.delete_trello_board(board_id)
 
 @pytest.fixture(scope="module")
 def driver():
@@ -51,43 +35,41 @@ def test_task_journey(driver, test_app):
     driver.get('http://localhost:5000/')    
     assert driver.title == 'To-Do App'
 
-def test_add_item(driver,test_app_driver):
+def test_add_item(driver,test_app):
     driver.get('http://localhost:5000/')    
-  
     driver.find_element_by_name("title").send_keys("selenium created new item")
-    driver.find_element_by_name("add_item").click()
-    #driver.find_element_by_name("add_item").submit()
+    driver.find_element_by_name("add_item").click()   
     driver.refresh()
     assert len(driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]'))==1
 
-def test_start_item(driver,test_app_driver):
+def test_start_item(driver,test_app):
     driver.get('http://localhost:5000/')
-    
+  
     driver.find_element(By.XPATH, '//details').click()
     start_link=driver.find_element(By.XPATH, '//li[contains(text(), "selenium created new item")]/a[3]')
     start_link.click()
     driver.refresh()    
     assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Doing Done'
 
-def test_complete_item(driver,test_app_driver):
+def test_complete_item(driver,test_app):
     driver.get('http://localhost:5000/')
-    
+
     driver.find_element(By.XPATH, '//summary[contains(text(),"Doing Items")]/..').click() 
     complete_link=driver.find_element(By.XPATH, '//li[contains(text(), "selenium created new item")]/a[2]')
     complete_link.click()
     driver.refresh()    
     assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Done To Do'
 
-def test_incomplete_item(driver,test_app_driver):
+def test_incomplete_item(driver,test_app):
     driver.get('http://localhost:5000/')
-      
+    
     incomplete_link=driver.find_element(By.XPATH, '//li[contains(text(), "selenium created new item")]/a[2]')
     incomplete_link.click()
     driver.refresh()    
     assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Not Started DoneStart Item'
 
 
-def test_delete_item(driver,test_app_driver):
+def test_delete_item(driver,test_app):
     driver.get('http://localhost:5000/')
     
     driver.find_element(By.XPATH, '//details').click()
@@ -95,5 +77,6 @@ def test_delete_item(driver,test_app_driver):
     remove_link.click()
     driver.refresh()
     assert len(driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]'))==0
+    session.delete_trello_board(os.environ['TRELLO_BOARD_ID'])
    
    

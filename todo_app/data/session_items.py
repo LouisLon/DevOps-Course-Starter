@@ -72,8 +72,10 @@ def get_items():
           
 
     active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
-    doing_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Doing"), None)
-    statuscomplete_list = next((board_list for board_list in board_lists if board_list['name'] == "Done"), None)
+    doing_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Doing"), {"id":""})
+    statuscomplete_list = next((board_list for board_list in board_lists if board_list['name'] == "Done"), {"id":""})
+    if active_board_list==None:
+        active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "To Do"), {"id":""})
 
     #Get cards in the list
     card_lists=get_cardsinboard(boards["id"],active_board_list["id"],doing_board_list["id"],statuscomplete_list["id"])
@@ -85,6 +87,12 @@ def get_items():
 def get_board_details():
     
     boardname='todo items'
+    if(os.environ.get('TRELLO_BOARD_ID') !=None):
+        return {
+        "id": os.environ['TRELLO_BOARD_ID'],
+        "name": "To Service"
+        }
+
     url="https://api.trello.com/1/search"
 
     headers = {
@@ -188,7 +196,8 @@ def add_item(title):
           
 
     active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "Things To Do"), None)
-
+    if active_board_list==None:
+        active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "To Do"), None)
     #Create a new Card
     
     url = "https://api.trello.com/1/cards"
