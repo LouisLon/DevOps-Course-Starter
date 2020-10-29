@@ -58,6 +58,8 @@ There's also a SECRET_KEY variable which is used to encrypt the flask session co
 The application requires a trello secret key and token for the variables [TRELLO_KEY] [TRELLO_TOKEN] When running setup.sh, the .env.template file will be copied to .env if the latter does not exist.
 
 Running the Test
+$ pip install requests-mock
+$ pip install selenium
 The file app_test.py and app_e2e_test.py has the unit test and integration test code
 This can be run with test explorer or pytest
 
