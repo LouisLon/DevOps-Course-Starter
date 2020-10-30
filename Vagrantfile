@@ -24,6 +24,7 @@ Vagrant.configure("2") do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -99,7 +100,7 @@ Vagrant.configure("2") do |config|
     sed 's/in-project = true/in-project = false/g' poetry.toml
     poetry install
     fi    
-    poetry run flask run
+    poetry run flask run --host 0.0.0.0
     "}  
   end
 end
