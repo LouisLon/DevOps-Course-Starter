@@ -83,7 +83,23 @@ Vagrant.configure("2") do |config|
      #cd ..
      pyenv install 3.8.5
      pyenv global 3.8.5
-  # TODO: Install pyenv prerequisites
-  # TODO: Install pyenv
+     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+     #source $HOME/.poetry/env
+     # TODO: Install pyenv prerequisites
+     # TODO: Install pyenv
   SHELL
+  
+  config.trigger.after :up do |trigger|
+    trigger.name = "Launching App"
+    trigger.info = "Running the TODO app setup script"    
+    trigger.run_remote = {privileged: false, inline: "
+    cd /vagrant
+    if [ -d /vagrant/.venv ]; then 
+    rm -r .venv
+    sed 's/in-project = true/in-project = false/g' poetry.toml
+    poetry install
+    fi    
+    poetry run flask run
+    "}  
+  end
 end
