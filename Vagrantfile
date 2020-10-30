@@ -63,8 +63,22 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+     sudo apt-get update   
+     cd ..
+     #curl -L -s https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash     
+     if [ ! -d ~/.pyenv ]; then
+     git clone https://github.com/pyenv/pyenv.git ~/.pyenv     
+     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.profile
+     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile
+     echo 'if command -v pyenv 1>/dev/null 2>&1; then' >> ~/.profile
+     echo ' eval "$(pyenv init -)"' >> ~/.profile     
+     echo 'fi' >> ~/.profile     
+     source ~/.profile
+     fi
+     #pyenv install 3.8.5
+     #pyenv global 3.8.5
+  # TODO: Install pyenv prerequisites
+  # TODO: Install pyenv
+  SHELL
 end
