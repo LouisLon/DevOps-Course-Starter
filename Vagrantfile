@@ -64,43 +64,42 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", privileged: false, inline: <<-SHELL        
-     sudo apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev \
-     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+     sudo apt-get update       
+     sudo apt-get install -y make libssl-dev zlib1g-dev \
+     libreadline-dev wget curl llvm libncurses5-dev libncursesw5-dev \
      xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
-     sudo apt-get install make
-     sudo apt-get update
-     #cd ..
-     #curl -L -s https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash     
+     sudo apt-get install bzip2 libreadline6 libreadline6-dev openssl
+     sudo apt install libssl1.0-dev
+     sudo apt-get install -y build-essential
+     sudo apt-get install -y libbz2-dev     
+     sudo apt-get install -y libsqlite3-dev
+             
      if [ ! -d ~/.pyenv ]; then
-     git clone --depth 2 https://github.com/pyenv/pyenv.git ~/.pyenv     
+     git clone https://github.com/pyenv/pyenv.git ~/.pyenv     
      echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.profile
      echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile
      echo 'if command -v pyenv 1>/dev/null 2>&1; then' >> ~/.profile
      echo ' eval "$(pyenv init -)"' >> ~/.profile     
      echo 'fi' >> ~/.profile     
      source ~/.profile
-     fi
-     #cd ..
+     fi      
      pyenv install 3.8.5
      pyenv global 3.8.5
-     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-     #source $HOME/.poetry/env
-     # TODO: Install pyenv prerequisites
-     # TODO: Install pyenv
+     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python        
   SHELL
   
   config.trigger.after :up do |trigger|
     trigger.name = "Launching App"
     trigger.info = "Running the TODO app setup script"    
-    trigger.run_remote = {privileged: false, inline: "
-    cd /vagrant
-    if [ -d /vagrant/.venv ]; then 
-    rm -r .venv
-    sed 's/in-project = true/in-project = false/g' poetry.toml
-    poetry install
-    fi    
+    trigger.run_remote = {privileged: false, inline: "    
+    cd /vagrant   
+    if grep -q 'in-project = true' poetry.toml; then     
+      sed -i 's/in-project = true/in-project = false/g' poetry.toml
+      poetry install
+    fi      
     poetry run flask run --host 0.0.0.0
     "}  
   end
+ 
 end
