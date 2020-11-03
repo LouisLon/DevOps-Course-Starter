@@ -93,11 +93,10 @@ Vagrant.configure("2") do |config|
     trigger.name = "Launching App"
     trigger.info = "Running the TODO app setup script"    
     trigger.run_remote = {privileged: false, inline: "    
-    cd /vagrant   
-    if grep -q 'in-project = true' poetry.toml; then     
-      sed -i 's/in-project = true/in-project = false/g' poetry.toml
+    cd /vagrant     
+    if ! dpkg-query -s \"poetry\" 1>/dev/null 2>&1; then
       poetry install
-    fi      
+    fi       
     poetry run flask run --host 0.0.0.0
     "}  
   end
