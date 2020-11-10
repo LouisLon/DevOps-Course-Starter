@@ -62,6 +62,5 @@ The file app_test.py and app_e2e_test.py has the unit test and integration test 
 This can be run with test explorer or pytest
 
 You can install pytest via pip
-$ pip install pytest
 To run pytest, simply run the following command from the root of your project.
 $ pytest
