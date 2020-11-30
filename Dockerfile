@@ -1,4 +1,24 @@
-FROM python:3.8-slim-buster
+FROM python:3.8-slim-buster as development
+
+WORKDIR /code
+
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_APP=todo_app/app.py
+ENV FLASK_ENV=development
+
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+
+COPY poetry.lock pyproject.toml /code/
+
+RUN poetry install -n
+COPY . .
+
+EXPOSE 5000
+CMD ["flask", "run"]
+
+
+FROM python:3.8-slim-buster as prod
 
 RUN mkdir /app 
 WORKDIR /app
