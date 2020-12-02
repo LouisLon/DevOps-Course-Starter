@@ -1,24 +1,23 @@
-FROM python:3.8-slim-buster as development
+FROM python:3.8.6-slim-buster as development
 
-WORKDIR /code
+WORKDIR /app
 
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_APP=todo_app/app.py
-ENV FLASK_ENV=development
+ENV FLASK_RUN_HOST 0.0.0.0
+ENV FLASK_APP todo_app/app.py
+ENV FLASK_ENV development
 
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
 
-COPY poetry.lock pyproject.toml /code/
+COPY poetry.lock pyproject.toml /app/
 
 RUN poetry install -n
-COPY . .
 
 EXPOSE 5000
 CMD ["flask", "run"]
 
 
-FROM python:3.8-slim-buster as prod
+FROM python:3.8-slim-buster as production
 
 RUN mkdir /app 
 WORKDIR /app
@@ -32,11 +31,11 @@ RUN poetry config virtualenvs.create false
 
 COPY poetry.lock pyproject.toml /app/
 
-RUN mkdir -p /app/src/todo_app
-RUN touch /app/src/todo_app/__init__.py
+RUN mkdir -p /app/todo_app
+RUN touch /app/todo_app/__init__.py
 
 RUN poetry install -n
-COPY ./todo_app /app/src/todo_app
+COPY ./todo_app /app/todo_app
 
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--chdir", "src/todo_app", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--chdir", "todo_app", "app:create_app()"]
