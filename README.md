@@ -63,4 +63,25 @@ This can be run with test explorer or pytest
 
 You can install pytest via pip
 To run pytest, simply run the following command from the root of your project.
+```bash
 $ pytest
+```
+
+To build the docker image, run either the `development` or the `production` build
+```bash
+$ docker build --target development --tag todo-app:dev .
+```
+```bash
+$ docker build --target production --tag todo-app:prod .
+```
+
+To run the docker to create a `development` or `production` container from the image
+```bash
+$ docker run --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:dev
+```
+For production, the trello key and token is required in the command below
+```bash
+$ docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:prod
+```
+
+
