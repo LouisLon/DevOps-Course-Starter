@@ -84,4 +84,5 @@ For production, the trello key and token is required in the command below
 $ docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:prod
 ```
 
-
+To View the technical UML diagram
+load the file documentation\ToDo_UML.drawio from the site https://app.diagrams.net/
