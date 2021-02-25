@@ -30,7 +30,7 @@ FROM python:3.8-slim-buster as test
 
 # Install Chrome
 RUN apt update && apt-get -y install chromium wget curl unzip
-# WORKDIR /app
+WORKDIR /app
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
 && apt install -y ./google-chrome-stable_current_amd64.deb \
 && rm ./google-chrome-stable_current_amd64.deb
@@ -40,7 +40,7 @@ RUN LATEST=`curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE
 && wget https://chromedriver.storage.googleapis.com/${LATEST}/chromedriver_linux64.zip \
 && unzip ./chromedriver_linux64.zip
 # Install poetry
-WORKDIR /app
+#WORKDIR /app
 ENV FLASK_RUN_HOST 0.0.0.0
 ENV FLASK_APP todo_app/tests/app_test.py
 ENV FLASK_ENV development
