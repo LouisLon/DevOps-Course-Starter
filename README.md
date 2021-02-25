@@ -83,6 +83,19 @@ For production, the trello key and token is required in the command below
 ```bash
 $ docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:prod
 ```
+For test
+To build the docker image, run the `test` build command
+```bash
+$ docker build --target test --tag todo-app:test .
+```
+```bash
+docker run --name todoContainer --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test
+
+# Start existing container
+docker start -i todoContainer
+
+# Remove container
+docker container rm todoContainer
 
 To View the technical UML diagram
 load the file documentation\ToDo_UML.drawio from the site https://app.diagrams.net/

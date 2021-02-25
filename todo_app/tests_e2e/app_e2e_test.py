@@ -26,9 +26,18 @@ def test_app():
     thread.join(1)
     #session.delete_trello_board(board_id)
 
-@pytest.fixture(scope="module")
+# @pytest.fixture(scope="module")
+# def driver():
+#     with webdriver.Firefox() as driver:
+#         yield driver
+
+@pytest.fixture(scope='module')
 def driver():
-    with webdriver.Firefox() as driver:
+    opts = webdriver.ChromeOptions()
+    opts.add_argument('--headless')
+    opts.add_argument('--no-sandbox')
+    opts.add_argument('--disable-dev-shm-usage')
+    with webdriver.Chrome('./chromedriver', options=opts) as driver:
         yield driver
 
 def test_task_journey(driver, test_app):
