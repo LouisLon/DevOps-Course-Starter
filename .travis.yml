@@ -1,6 +1,10 @@
 services:
-  - docker
+- docker
 before_install:
-  - docker build --target test --tag todo-app:test .
+- docker build --target test --tag todo-app:test .
 script:
-  - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test
+- docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test
+env:
+  global:
+  - secure: P+695PxKEnCZJaukQFQW/mZ/QhSqPcn6O/BtnlpwHuLAxNyAaFzRTRHtdi4Ahii4oA+w26Tt+67bB2dhYCetORS2keRB2HqArDDrgBfMr7Vo+cWGCRay2E3bWYCWtUhr2T6+uF7h6QiynHjrmtd5yeglLKUIVI+OHivhPM+08kxKSsdz7vU3MQK19jY+beY5TcPWGU0pcq5xHnsXU3LQ/lq76KazzVJTNUcOIB0qy5PbTK5ttiflXq/Ou5ekrCSqfe+qub0NMG3UAnPWK7Q7ZZyhmj3Y1lKHobjPN0gCd0Q4USYxpHQM/xqWrXINHe7ZJb1/r+RXhIjdtI5AvyeV0B2ZfgG+E4mturOle3SsOfQJ8C7I8arddKbnaawkVpONAUGVyCcUHSg0Kw0DICRP7S+1vu2q93WEeMpIl6xoOsEkVPpQgd7Z9Big9J3M5Brgu53mcZKceXTo1nyyzhczIOZ4MHGKDVZ+oQhP9uri0v3XcjlkYFonL7UKDpNMnznbA4rUC0pid1/LCcyhGMZFGaNvxAdbRt4C7e/QqLDuRAEtMPABC/eP6t16p39sRMKR9MNHtpHTwVSp6dml/1DZcXe2LSJIY7LZIQ4UCg78cTtmxiEgqzopp8hOG8kSCqY5Ijm88vV07mgycY6RWLXhX1cGGHjNjXiLrCr0XBmI9C8=
+  - secure: kD0+s7zjptSEyvwYXB0Iy/T0lg6rOmHqav1o7RF8NxQryYWH9vzXQljX8KPOZJ/gxIE3vCF1FujkLZJALGqt71ib5/E4+68ATsevjd4/SA0IaHT7iu1uGwnGtS85rR7E0FYlcEfDmWkDu08pgEvR51QsyL6qLjo6abtosA89cziUKQoCnS4XCZZ68FHXj/i0wbsBueJELYxNrGrIrdtyyTAws87qoa0fajc98+EpZKvcP65WLszBRCHIRJBK2XGCbgXQUsdZOTueB/QNjnprx21KW8Li8eLZMQptHTpqYGOFpeLbTg/mjTGaf0ZHI+p0Vv8/k1U8Wo2nRyiNU2BzxmGTIe1oHqLKqYjRy02K0bfDdm9QzEkBDGPTdoe2FYGwosJkdt/IBCnRHcEMsbrUYZRWsijJwtIccj72XgQTBwhu/vGk2ev3UTMAi4AdUQNR/JpbrVOIh3ODQ1PDKo31op9EUBPbtoSLvfld+6w6um/EwLR7GJEYzIg0JwKSzz31RuKZHcT+GEmdGVP+NPVJ0hPVp0onpuXeEF0qTKJxRj1QrFS1YYM9olSOs/RBDBV+wZ33fFnUbSZmb/R4/rpbszObE6+NlyN5113Mrcyk5rebQ6ZBlzrlCgG2qC4DVmkZhvUDCyM8qc3oVdLmYN5OQaJ9eyScev0tUGlp5HAYoJA=
