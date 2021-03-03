@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 def test_app():
 # Create the new board & update the board id environment variable    
     file_path = find_dotenv('.env')
-    load_dotenv(file_path, override=True)
+    load_dotenv(file_path)    
     board_id = session.create_trello_board()
     os.environ['TRELLO_BOARD_ID'] = board_id
     # construct the new application
