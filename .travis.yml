@@ -3,4 +3,4 @@ services:
 before_install:
 - docker build --target test --tag todo-app:test .
 script:
-- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test
+- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
