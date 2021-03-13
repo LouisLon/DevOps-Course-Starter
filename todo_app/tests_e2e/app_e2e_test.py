@@ -24,12 +24,7 @@ def test_app():
     yield app
     # Tear Down
     thread.join(1)
-    #session.delete_trello_board(board_id)
-
-# @pytest.fixture(scope="module")
-# def driver():
-#     with webdriver.Firefox() as driver:
-#         yield driver
+    
 
 @pytest.fixture(scope='module')
 def driver():

@@ -40,12 +40,7 @@ RUN LATEST=`curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE
 && wget https://chromedriver.storage.googleapis.com/${LATEST}/chromedriver_linux64.zip \
 && unzip ./chromedriver_linux64.zip
 # Install poetry
-#WORKDIR /app
-ENV FLASK_RUN_HOST 0.0.0.0
-ENV FLASK_APP todo_app/tests/app_test.py
-ENV FLASK_ENV development
 RUN pip install poetry && poetry config virtualenvs.create true
 COPY poetry.lock pyproject.toml /app/
 RUN poetry install -n
-EXPOSE 5000
 ENTRYPOINT [ "poetry","run","pytest" ]
