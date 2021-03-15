@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 def test_app():
 # Create the new board & update the board id environment variable    
     file_path = find_dotenv('.env')
-    load_dotenv(file_path, override=True)
+    load_dotenv(file_path)    
     board_id = session.create_trello_board()
     os.environ['TRELLO_BOARD_ID'] = board_id
     # construct the new application
@@ -24,11 +24,15 @@ def test_app():
     yield app
     # Tear Down
     thread.join(1)
-    #session.delete_trello_board(board_id)
+    
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def driver():
-    with webdriver.Firefox() as driver:
+    opts = webdriver.ChromeOptions()
+    opts.add_argument('--headless')
+    opts.add_argument('--no-sandbox')
+    opts.add_argument('--disable-dev-shm-usage')
+    with webdriver.Chrome('./chromedriver', options=opts) as driver:
         yield driver
 
 def test_task_journey(driver, test_app):
@@ -49,6 +53,7 @@ def test_start_item(driver,test_app):
     start_link=driver.find_element(By.XPATH, '//li[contains(text(), "selenium created new item")]/a[3]')
     start_link.click()
     driver.refresh()    
+    driver.find_element(By.XPATH, '//summary[contains(text(),"Doing Items")]/..').click() 
     assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Doing Done'
 
 def test_complete_item(driver,test_app):
@@ -66,6 +71,7 @@ def test_incomplete_item(driver,test_app):
     incomplete_link=driver.find_element(By.XPATH, '//li[contains(text(), "selenium created new item")]/a[2]')
     incomplete_link.click()
     driver.refresh()    
+    driver.find_element(By.XPATH, '//summary[contains(text(),"ToDo Items")]/..').click() 
     assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Not Started DoneStart Item'
 
 

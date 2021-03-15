@@ -24,3 +24,23 @@ RUN mkdir -p /app/todo_app && touch /app/todo_app/__init__.py && poetry install 
 COPY ./todo_app /app/todo_app
 EXPOSE 5000
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--chdir", "todo_app", "app:create_app()"]
+
+
+FROM python:3.8-slim-buster as test
+
+# Install Chrome
+RUN apt update && apt-get -y install chromium wget curl unzip
+WORKDIR /app
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+&& apt install -y ./google-chrome-stable_current_amd64.deb \
+&& rm ./google-chrome-stable_current_amd64.deb
+# Install Chromium WebDriver
+RUN LATEST=`curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE` \
+&& echo "Installing chromium webdriver version ${LATEST}" \
+&& wget https://chromedriver.storage.googleapis.com/${LATEST}/chromedriver_linux64.zip \
+&& unzip ./chromedriver_linux64.zip
+# Install poetry
+RUN pip install poetry && poetry config virtualenvs.create true
+COPY poetry.lock pyproject.toml /app/
+RUN poetry install -n
+ENTRYPOINT [ "poetry","run","pytest" ]

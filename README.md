@@ -57,7 +57,7 @@ The .env file is used by flask to set environment variables when running flask r
 There's also a SECRET_KEY variable which is used to encrypt the flask session cookie.
 The application requires a trello secret key and token for the variables [TRELLO_KEY] [TRELLO_TOKEN] When running setup.sh, the .env.template file will be copied to .env if the latter does not exist.
 
-Running the Test
+## Running the Test
 The file app_test.py and app_e2e_test.py has the unit test and integration test code
 This can be run with test explorer or pytest
 
@@ -66,7 +66,7 @@ To run pytest, simply run the following command from the root of your project.
 ```bash
 $ pytest
 ```
-
+## Docker
 To build the docker image, run either the `development` or the `production` build
 ```bash
 $ docker build --target development --tag todo-app:dev .
@@ -83,6 +83,17 @@ For production, the trello key and token is required in the command below
 ```bash
 $ docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:prod
 ```
+## For test
+To build the docker image, run the `test` build command
+```bash
+$ docker build --target test --tag todo-app:test .
+```
+To run
+```bash
+docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 
-To View the technical UML diagram
+# E2E test
+docker run --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test todo_app/tests_e2e/
+```
+## To View the technical UML diagram
 load the file documentation\ToDo_UML.drawio from the site https://app.diagrams.net/
