@@ -3,7 +3,7 @@ language: generic
 services:
 - docker
 before_install:
-- git update-index --chmod=+x scripts
+- git update-index --chmod=+x travis.sh
 - scripts/travis.sh
 # - docker build --target production --tag todo-app:latest .
 # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
