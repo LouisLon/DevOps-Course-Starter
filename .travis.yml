@@ -3,7 +3,7 @@ services:
 before_install:
 - docker build --target production --tag todo-app:latest .
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- docker push todo-app:latest && docker logout
+- docker push "$DOCKER_USERNAME"/todo-app:latest && docker logout
 # # - docker build --target test --tag todo-app:test .
 script:
 #   - ./build/set_pass.sh
