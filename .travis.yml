@@ -4,7 +4,7 @@ services:
 - docker
 before_install:
 # - docker build --target test --tag todo-app:test .
-- docker login --username="$HEROKU_USERNAME" --password=$(heroku auth:"$HEROKU_APIKEY") registry.heroku.com
+- docker login --username="$HEROKU_USERNAME" --password="$HEROKU_APIKEY" registry.heroku.com
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 #- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
 - curl https://toolbelt.heroku.com/install.sh | sh  #install heroku
