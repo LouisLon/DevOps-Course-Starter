@@ -1,12 +1,13 @@
-#sudo: required
+sudo: required
 language: python
 services:
 - docker
 before_install:
 # - docker build --target test --tag todo-app:test .
+- docker login --username="$HEROKU_USERNAME" --password=$(heroku auth:"$HEROKU_APIKEY") registry.heroku.com
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 #- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
-#- curl https://toolbelt.heroku.com/install.sh | sh  #install heroku
+- curl https://toolbelt.heroku.com/install.sh | sh  #install heroku
 #- docker login -u "$HEROKU_USERNAME" --password="$HEROKU_APIKEY" registry.heroku.com #logged in
 #- echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
  
@@ -14,21 +15,14 @@ script:
 # - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 # - docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 - echo "registry.heroku.com/$HEROKU_APP/web"
+
+after_success:
 - docker build --target production --tag todo-app:prod .
-
-# after_success:
-# - docker build --target production --tag todo-app:prod .
-# - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-# - docker tag todo-app:prod registry.heroku.com/trelloappex8/web
-# - docker push "$DOCKER_USERNAME"/todo-app      
-# - docker push registry.heroku.com/trelloappex8/web
-# - echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
-# - heroku container:release web --app trelloappex8 
-
-deploy:
-  provider: heroku
-  api_key: $HEROKU_APIKEY    
-  app: trelloappex8
+- docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
+- docker tag todo-app:prod registry.heroku.com/trelloappex8/web
+- docker push "$DOCKER_USERNAME"/todo-app      
+- docker push registry.heroku.com/trelloappex8/web
+- heroku container:release web --app trelloappex8 
 
 # deploy:
 # - provider: script
