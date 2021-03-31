@@ -15,11 +15,11 @@ after_success:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
 - docker push "$DOCKER_USERNAME"/todo-app
+- docker tag "$DOCKER_USERNAME"/todo-app registry.heroku.com/$HEROKU_APP/web
 #- docker logout
 deploy:
 - provider: script
-  script:       
-        docker tag todo-app:prod registry.heroku.com/trelloappex8/web
+  script:         
         docker push registry.heroku.com/$HEROKU_APP/web
         heroku container:release web -a $HEROKU_APP  
   on:
