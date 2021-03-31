@@ -1,11 +1,42 @@
 services:
 - docker
 before_install:
-- docker build --target production --tag "$DOCKER_USERNAME"/todo-app:latest .
-- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+- docker build --target production --tag "$DOCKER_USERNAME"/todo-app:prod .
+# - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
+# - wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
+# - docker login -u "$HEROKU_USERNAME" --password=$(heroku auth:token) registry.heroku.com #logged in
+
 # # - docker build --target test --tag todo-app:test .
 script:
-- docker push "$DOCKER_USERNAME"/todo-app:latest && docker logout
+- docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:prod  todo_app/tests/
+- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:prod  todo_app/tests_e2e/
+
+
+# after_success:
+# - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+# - docker push "$DOCKER_USERNAME"/todo-app
+# deploy:
+# - provider: heroku
+#   app: trelloappex8
+#   api_key:
+#     secure: "$HEROKU_APIKEY"
+#   on:
+#       branch: master
+
+
+# services:
+# - docker
+# before_install:
+# - docker build --target test --tag todo-app:test .
+# script:
+# - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
+# - docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
+
+# deploy:
+#   provider: script
+#   script: 
+#     heroku container:release web --app your-app-name
+
 #   - ./build/set_pass.sh
 #   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && docker logout
 # # - docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:latest
@@ -15,3 +46,15 @@ script:
 # # # - docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 # # - docker build --target production --tag todo-app:latest .
 # # $ docker push <image_tag> 
+
+
+# docker build --target production --tag todo-app:prod .
+# docker tag todo-app:prod louiseg/todo-app:latest
+# docker push louiseg/todo-app
+
+# heroku login
+# heroku container:login
+# docker pull louiseg/todo-app:latest
+# docker tag louiseg/todo-app:latest registry.heroku.com/trelloappex8/web
+# docker push registry.heroku.com/trelloappex8/web
+# heroku container:release web -a trelloappex8 
