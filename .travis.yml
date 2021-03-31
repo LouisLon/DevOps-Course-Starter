@@ -3,11 +3,9 @@ services:
 before_install:
 - docker build --target test --tag todo-app:test .
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-# - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-# - wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
-# - docker login -u "$HEROKU_USERNAME" --password=$(heroku auth:token) registry.heroku.com #logged in
+- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
+- docker login -u "$HEROKU_USERNAME" --password="$HEROKU_APIKEY" registry.heroku.com #logged in
 
-# # - docker build --target test --tag todo-app:test .
 script:
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 - docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
@@ -18,9 +16,11 @@ after_success:
 - docker push "$DOCKER_USERNAME"/todo-app
 - docker logout
 deploy:
-- provider: heroku
-  app: trelloappex8
-  api_key: "$HEROKU_APIKEY"
+- provider: script
+  script:
+        docker tag "$DOCKER_USERNAME"/todo-app:latest registry.heroku.com/$HEROKU_APP/web
+        docker push registry.heroku.com/$HEROKU_APP/web
+        heroku container:release web -a $HEROKU_APP  
   on:
     branch: master
 # deploy:   
