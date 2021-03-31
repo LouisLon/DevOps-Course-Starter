@@ -18,7 +18,7 @@ after_success:
 deploy:
 - provider: script
   script:        
-        docker tag "$DOCKER_USERNAME"/todo-app:latest registry.heroku.com/$HEROKU_APP/web
+        docker tag "$DOCKER_USERNAME/todo-app:latest" registry.heroku.com/$HEROKU_APP/web
         docker push registry.heroku.com/$HEROKU_APP/web
         heroku container:release web -a $HEROKU_APP  
   on:
