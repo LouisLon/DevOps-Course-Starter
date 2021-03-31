@@ -8,8 +8,8 @@ before_install:
 
 # # - docker build --target test --tag todo-app:test .
 script:
-- docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:prod  todo_app/tests/
-- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:prod  todo_app/tests_e2e/
+- docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app "$DOCKER_USERNAME"/todo-app:prod  todo_app/tests/
+- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app "$DOCKER_USERNAME"/todo-app:prod  todo_app/tests_e2e/
 
 
 # after_success:
