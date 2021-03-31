@@ -20,8 +20,8 @@ after_success:
 deploy:
 - provider: script
   script:         
-        docker push registry.heroku.com/$HEROKU_APP/web
-        heroku container:release web -a $HEROKU_APP  
+      docker push registry.heroku.com/$HEROKU_APP/web;
+      heroku container:release web -a $HEROKU_APP;  
   on:
     branch: master
 # deploy:   
