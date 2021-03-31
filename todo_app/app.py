@@ -2,8 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for
 import todo_app.data.session_items as session
 #from todo_app.flask_config import Config
 import requests
+import os
+
 def create_app():
     app = Flask(__name__)
+    port = int(os.environ.get("PORT", 5000))
     #app.config.from_object(Config)
     # All the routes and setup code etc
 
@@ -55,7 +58,8 @@ def create_app():
     return app
 
 if __name__ == '__main__':
-    create_app().run()
+    create_app().run(debug=True,host='0.0.0.0',port=port)
+    
 
 
 
