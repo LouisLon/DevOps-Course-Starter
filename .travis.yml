@@ -17,13 +17,11 @@ after_success:
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
 - docker push "$DOCKER_USERNAME"/todo-app
 - docker logout
-# - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-# - docker push "$DOCKER_USERNAME"/todo-app
-# deploy:
-# - provider: heroku
-#   app: trelloappex8
-#   api_key:
-#     secure: "$HEROKU_APIKEY"
+deploy:
+- provider: heroku
+  app: trelloappex8
+  api_key:
+    secure: "$HEROKU_APIKEY"
 #   on:
 #       branch: master
 
