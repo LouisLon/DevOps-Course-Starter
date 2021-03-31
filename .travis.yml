@@ -1,14 +1,15 @@
 sudo: required
-language: generic
+language: python
 services:
 - docker
 before_install:
 # - docker build --target test --tag todo-app:test .
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
+#- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
+- curl https://cli-assets.heroku.com/install.sh | sh  #install heroku
 #- docker login -u "$HEROKU_USERNAME" --password="$HEROKU_APIKEY" registry.heroku.com #logged in
 - echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
-
+ 
 script:
 # - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 # - docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
@@ -24,7 +25,8 @@ deploy:
   script:   
       docker push "$DOCKER_USERNAME"/todo-app;      
       docker push registry.heroku.com/$HEROKU_APP/web;
-      #heroku container:release web --app $HEROKU_APP;  
+      #heroku container:release web --app $HEROKU_APP; 
+      heroku container:release web --app $HEROKU_APP 
   on:
     branch: master
 # deploy:   
