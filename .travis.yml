@@ -1,3 +1,4 @@
+sudo: required
 services:
 - docker
 before_install:
@@ -15,14 +16,14 @@ script:
 after_success:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-- docker push "$DOCKER_USERNAME"/todo-app
-- docker tag "$DOCKER_USERNAME"/todo-app registry.heroku.com/$HEROKU_APP/web
+- docker tag todo-app:prod registry.heroku.com/$HEROKU_APP/web
 #- docker logout
 deploy:
 - provider: script
-  script:         
+  script:   
+      docker push "$DOCKER_USERNAME"/todo-app;      
       docker push registry.heroku.com/$HEROKU_APP/web;
-      heroku container:release web -a $HEROKU_APP;  
+      heroku container:release web --app $HEROKU_APP;  
   on:
     branch: master
 # deploy:   
