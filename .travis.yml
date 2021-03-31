@@ -8,7 +8,7 @@ before_install:
 #- wget -qO- https://toolbelt.heroku.com/install.sh | sh #installed heroku CLI
 - curl https://toolbelt.heroku.com/install.sh | sh  #install heroku
 #- docker login -u "$HEROKU_USERNAME" --password="$HEROKU_APIKEY" registry.heroku.com #logged in
-- echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
+#- echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
  
 script:
 # - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
@@ -21,6 +21,7 @@ after_success:
 - docker tag todo-app:prod registry.heroku.com/$HEROKU_APP/web
 - docker push "$DOCKER_USERNAME"/todo-app;      
 - docker push registry.heroku.com/$HEROKU_APP/web; 
+- echo "$HEROKU_APIKEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
 - heroku container:release web --app $HEROKU_APP 
 
 # deploy:
