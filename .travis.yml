@@ -1,6 +1,8 @@
 language: python
+
 services:
 - docker
+
 before_install:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - curl https://toolbelt.heroku.com/install.sh | sh  
