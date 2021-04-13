@@ -4,13 +4,14 @@ services:
 - docker
 
 before_install:
+- bundle exec rails runner "Webdrivers::Chromedriver.update"
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - curl https://toolbelt.heroku.com/install.sh | sh  
 - echo "$HEROKU_API_KEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
 
-before_script:
-  - chromedriver-update 89.0.4389.114
- 
+addons:
+  chrome: stable
+
 script:
 - docker build --target test --tag todo-app:test .
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
