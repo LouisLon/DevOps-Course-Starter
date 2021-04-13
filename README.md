@@ -98,13 +98,21 @@ docker run --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo
 ## To View the technical UML diagram
 load the file documentation\ToDo_UML.drawio from the site https://app.diagrams.net/
 
-docker build --target production --tag todo-app:prod .
-docker tag todo-app:prod louiseg/todo-app:latest
-docker push louiseg/todo-app
+## Build in Travis and deploy to Heroku
+https://travis-ci.com/github/LouisLon/DevOps-Course-Starter
+Build docker test image and run tests with the .travis.yml steps
+Build docker prod image and deploy to Heroku - https://trelloappex8.herokuapp.com/
 
-heroku login
-heroku container:login
-docker pull louiseg/todo-app:latest
-docker tag louiseg/todo-app:latest registry.heroku.com/trelloappex8/web
-docker push registry.heroku.com/trelloappex8/web
-heroku container:release web -a trelloappex8 
+This can be deployed manually by the commands
+```bash
+$ docker build --target production --tag todo-app:prod .
+$ docker tag todo-app:prod louiseg/todo-app:latest
+$ docker push louiseg/todo-app
+
+$ heroku login
+$ heroku container:login
+$ docker pull louiseg/todo-app:latest
+$ docker tag louiseg/todo-app:latest registry.heroku.com/trelloappex8/web
+$ docker push registry.heroku.com/trelloappex8/web
+$ heroku container:release web -a trelloappex8 
+```

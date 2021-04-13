@@ -36,7 +36,8 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
 && apt install -y ./google-chrome-stable_current_amd64.deb \
 && rm ./google-chrome-stable_current_amd64.deb
 # Install Chromium WebDriver
-RUN LATEST=`curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE` \
+# RUN LATEST=`curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE` \
+RUN LATEST=89.0.4389.23 \
 && echo "Installing chromium webdriver version ${LATEST}" \
 && wget https://chromedriver.storage.googleapis.com/${LATEST}/chromedriver_linux64.zip \
 && unzip ./chromedriver_linux64.zip
