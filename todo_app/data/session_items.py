@@ -2,6 +2,12 @@ from collections import OrderedDict
 
 import requests, os
 from datetime import datetime
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+
+
+client = MongoClient(os.getenv('MONGODB_CONNECTIONSTRING'))
+db = client.PythonTodoDB
 
 class CustomError(Exception):
     def __init__(self, *args):
@@ -47,12 +53,12 @@ class ViewModel:
 
     @property
     def recent_done_items(self):
-        recent_done_items = [done_item for done_item in self._items if done_item['status']=="Done" and datetime.strptime(done_item['dateLastActivity'],'%d-%m-%Y')==datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')]        
+        recent_done_items = [done_item for done_item in self._items if done_item['status']=="Done" and datetime.strptime((done_item['dateLastActivity']).split(' ')[0],'%Y-%m-%d')==datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')]        
         return recent_done_items
 
     @property
     def older_done_items(self):
-        older_done_items = [done_item for done_item in self._items if done_item['status']=="Done"  and datetime.strptime(done_item['dateLastActivity'],'%d-%m-%Y')<datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')]         
+        older_done_items = [done_item for done_item in self._items if done_item['status']=="Done"  and datetime.strptime((done_item['dateLastActivity']).split(' ')[0],'%Y-%m-%d')<datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')]         
         return older_done_items
 
 
@@ -85,84 +91,95 @@ def get_items():
     return sorted_default_items
 
 def get_board_details():
-    
-    boardname='todo items'
-    if(os.environ.get('TRELLO_BOARD_ID') !=None):
+    result=db.list_collection_names()
+    if(result==None):
+        boards_name = {"name": "todo items","date": datetime.datetime.utcnow()}
+        boardscol = db["boards"]
+        post_id = boardscol.insert_one(boards_name).inserted_id
         return {
-        "id": os.environ['TRELLO_BOARD_ID'],
-        "name": "To Service"
+        "id": str(ObjectId(post_id)),
+        "name": "todo items",
         }
-
-    url="https://api.trello.com/1/search"
-
-    headers = {
-    "Accept": "application/json"
+    else:
+        for coll in result:
+            if(coll=="boards"):
+                document=db.boards.find_one({"name": "todo items"})
+                return {
+                "id": str(ObjectId(document['_id'])),
+                "name": document["name"],
+                }
+            
+    boards = {"name": "todo items","date": datetime.utcnow()}
+    boardscol = db["boards"]
+    post_id = boardscol.insert_one(boards).inserted_id
+    return {
+    "id": str(ObjectId(post_id)),
+    "name": "todo items",
     }
 
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN'),  
-    'query' : 'name:"'+boardname+'"',    
-    'modelTypes' : 'boards',
-    'board_fields' : '"name"'
-    }
-
-    r = requests.request(
-    "GET",
-    url,
-    headers=headers,
-    params=query
-    )
-    #print(query)
-    if r.status_code == 200:
-        jsonResponse = r.json()
-        return {
-        "id": jsonResponse["boards"][0]["id"],
-        "name": boardname,
-        }
-    else:        
+    if(post_id==None):        
         raise CustomError('Error finding a Trello board')
    
-
+    
 def get_listinboard(board_id):
     board_lists = []   
-     
-    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/lists', params={'key': os.getenv('TRELLO_KEY'), 'token': os.getenv('TRELLO_TOKEN')})
-    if r.status_code == 200:
-        jsonResponse = r.json()  
-        for json_item in jsonResponse:
+    result=db.list_collection_names()
+    if(result==None):
+        list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
+        listscol = db["lists"]
+        post_id = listscol.insert_one(list_name).inserted_id
+        for json_item in list_name:
             board_lists.append({
-            "id": json_item["id"],
+            "id": str(ObjectId(json_item['_id'])),
             "name": json_item["name"],
             })
-    else:        
-        raise CustomError('Error finding a Trello List')
+        return board_lists       
+    else:
+        for coll in result:
+            if(coll=="lists"):
+                document=db.lists.find()
+                for json_item in document:
+                    board_lists.append({
+                    "id": str(ObjectId(json_item['_id'])),
+                    "name": json_item["name"],
+                    })
+                return board_lists
+
+    list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
+    listscol = db["lists"]
+    post_id = listscol.insert_many(list_name).inserted_ids
+    for json_item in list_name:
+        board_lists.append({
+        "id": str(ObjectId(json_item['_id'])),
+        "name": json_item["name"],
+        })
     return board_lists
+
+    if(post_id==None):        
+        raise CustomError('Error finding a Trello board')
 
 def get_cardsinboard(board_id,active_status_id,doing_status_id,complete_status_id):
     card_lists = []    
     card_list = {}  
-    r = requests.get('https://api.trello.com/1/boards/'+board_id+'/cards', params={'key': os.getenv('TRELLO_KEY'), 'token': os.getenv('TRELLO_TOKEN')})
-    if r.status_code == 200:
-        jsonResponse = r.json()  
-        for json_item in jsonResponse:            
-            card_list["id"] = json_item['id']
-            card_list["title"]  = json_item['name']
-            card_list["dateLastActivity"]  = datetime.strptime(json_item['dateLastActivity'].split('T')[0], "%Y-%m-%d").strftime('%d-%m-%Y')
-            card_list["active_list_id"]  = active_status_id
-            card_list["doing_list_id"]  = doing_status_id
-            card_list["complete_list_id"]  = complete_status_id
 
-            if(active_status_id==json_item['idList']):
-                card_list["status"]  = 'Not Started'
-            elif (doing_status_id==json_item['idList']):
-                card_list["status"]  = 'Doing'
-            else:
-                card_list["status"]  = 'Done'
-            card_lists.append(card_list.copy())  
-    else:        
-        raise CustomError('Error finding Trello Cards')
+    for json_item in db.cards.find({"idBoard": board_id}):        
+        card_list["id"] = str(ObjectId(json_item['_id']))
+        card_list["title"]  = json_item['name']
+        card_list["dateLastActivity"]  = str(json_item['dateLastActivity'])
+        card_list["active_list_id"]  = active_status_id
+        card_list["doing_list_id"]  = doing_status_id
+        card_list["complete_list_id"]  = complete_status_id
+
+        if(active_status_id==json_item['idList']):
+            card_list["status"]  = 'Not Started'
+        elif (doing_status_id==json_item['idList']):
+            card_list["status"]  = 'Doing'
+        else:
+            card_list["status"]  = 'Done'
+        card_lists.append(card_list.copy())  
+
     return card_lists
+
 
 def get_item(id):
     """
@@ -199,38 +216,22 @@ def add_item(title):
     if active_board_list==None:
         active_board_list = next((board_list for board_list in board_lists if board_list['name'] == "To Do"), None)
     #Create a new Card
-    
-    url = "https://api.trello.com/1/cards"
 
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN'),
-    'idList': active_board_list["id"],
-    'name': title
-    }
+    card = {"idBoard": boards["id"],
+        "idList": active_board_list["id"],
+        "name": title,
+        "desc": "",
+        "dateLastActivity": datetime.utcnow()}
 
-    r = requests.request(
-    "POST",
-    url,
-    params=query
-    )
+
+    card_id = db.cards.insert_one(card).inserted_id
     
-    if r.status_code == 200:
-        jsonResponse = r.json()           
-        id = jsonResponse['id']
-    else:        
+    if card_id==None:             
         raise CustomError('Error finding deleting Trello card '+title)
 
     items = get_items()
-
-    # Determine the ID for the item based on that of the previously added item
-    #id = len(items) + 1 if items else 0
    
-    item = { 'id': id, 'title': title, 'status': 'Not Started' }
-
-    # Add the item to the list
-    #items.append(item)    
-    #session['items'] = sort_items(items)
+    item = { 'id': str(ObjectId(card_id)), 'title': title, 'status': 'Not Started' }
 
     return item
 
@@ -238,15 +239,10 @@ def add_item(title):
 def save_item(item):
     """
     Updates an existing item in the session. If no existing item matches the ID of the specified item, nothing is saved.
-
+    
     Args:
         item: The item to save.
     """
-    url = "https://api.trello.com/1/cards/"+item['id']
-
-    headers = {
-    "Accept": "application/json"
-    }
 
     idlist=item["complete_list_id"]
     if(item['status'] == "Not Started"):
@@ -254,25 +250,13 @@ def save_item(item):
     elif(item['status'] == "Doing"):
         idlist=item["doing_list_id"]
 
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN'),
-    'idList': idlist  #move card
-    }
+    itemtoupdate =  {"_id": ObjectId(item['id'])} 
+    newvalues = { "$set": { "idList": idlist,"dateLastActivity":  datetime.utcnow() } }
 
-    r = requests.request(
-    "PUT",
-    url,
-    headers=headers,
-    params=query
-    )
-    
-    if r.status_code == 200:
-        jsonResponse = r.json()           
-        id = jsonResponse['id']
-    else:        
-        raise CustomError('Error finding updating Trello card '+item["title"])
-    
+    results=db.cards.update_one(itemtoupdate, newvalues)
+    #result.upserted_id
+    if(results.matched_count==0):        
+        raise CustomError('Error finding updating card '+item["title"])    
   
     existing_items = get_items()    
     updated_items = [item if item['id'] == existing_item['id'] else existing_item for existing_item in existing_items]    
@@ -287,23 +271,10 @@ def remove_item(id):
     Args:
         item: The item id to remove.
     """
-    url = "https://api.trello.com/1/cards/"+id
-
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN')   
-    }
-
-    r = requests.request(
-    "DELETE",
-    url,
-    params=query
-    )
-
+    deleteitem =  {"_id": ObjectId(id)} 
+    results=db.cards.delete_one(deleteitem)
+   
     items = get_items()
-
-    # Add the item to the list      
-    #session['items'] = sort_items(items)
 
     return id
 
@@ -312,46 +283,18 @@ def sort_items(list_items):
     return list_items
 
 def create_trello_board():
-    url = "https://api.trello.com/1/boards/"
-    
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN'),
-    'name': "To Service"
-    }
-    
-    response = requests.request(
-    "POST",
-    url,
-    params=query
-    )
-    #print(response.status_code)
-    #print(response.text)   
-    if response.status_code == 200:
-        jsonResponse = response.json()           
-        board_id = jsonResponse['id']
-    else:        
-        raise CustomError('Error finding creating board "To Service" - '+str(response.status_code)+' - '+response.text)
-   
-       
+    board = {        
+        "name": "To Services",
+        "date": datetime.utcnow()}
 
-    return board_id
+    board_id = db.boards.insert_one(board).inserted_id
+     
+    if (board_id==None):          
+        raise CustomError('Error finding creating board "To Service" - '+str(response.status_code)+' - '+response.text)
+    return str(ObjectId(board_id))
 
 
 def delete_trello_board(board_id):
-    url = "https://api.trello.com/1/boards/"+board_id
-
-    query = {
-    'key': os.getenv('TRELLO_KEY'),
-    'token': os.getenv('TRELLO_TOKEN')
-    }
-
-    response = requests.request(
-    "DELETE",
-    url,
-    params=query
-    )
-
-   # print(response.text)     
-
-    return (response.status_code==200)
+    deleteboard =  {"_id": ObjectId(board_id)} 
+    results=db.boards.delete_one(deleteboard)   
+    return (results.deleted_count>0)

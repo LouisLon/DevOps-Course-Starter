@@ -8,7 +8,7 @@ import requests
 
 @pytest.fixture
 def trello_items():
-    items=[{'dateLastActivity': '01-10-2020', 'id': '5f75c7b4f473030a20a30224', 'status': 'Doing', 'title': 'Staying at home'}, {'dateLastActivity': '10-09-2020', 'id': '5f58c9c6bf4667146a017e32', 'status': 'Done', 'title': 'Book my holiday'}, {'dateLastActivity': '14-09-2020', 'id': '5f5902cd7bdb1e12c8061d9a', 'status': 'Done', 'title': 'Fix Alicia book'}, {'dateLastActivity': '14-09-2020', 'id': '5f58c9c619f4fe1505e7290e', 'status': 'Not Started', 'title': 'Buy some clothes'}, {'dateLastActivity': '10-09-2020', 'id': '5f590331c1c56168a4cfe96b', 'status': 'Not Started', 'title': 'Fix Alicia book again'}, {'dateLastActivity': '09-09-2020', 'id': '5f58c9c64f6452685d239aaa', 'status': 'Not Started', 'title': 'Go for daily walks'}]
+    items=[{'dateLastActivity': '2020-10-01', 'id': '5f75c7b4f473030a20a30224', 'status': 'Doing', 'title': 'Staying at home'}, {'dateLastActivity': '2020-09-10', 'id': '5f58c9c6bf4667146a017e32', 'status': 'Done', 'title': 'Book my holiday'}, {'dateLastActivity': '2020-09-14', 'id': '5f5902cd7bdb1e12c8061d9a', 'status': 'Done', 'title': 'Fix Alicia book'}, {'dateLastActivity': '2020-09-14', 'id': '5f58c9c619f4fe1505e7290e', 'status': 'Not Started', 'title': 'Buy some clothes'}, {'dateLastActivity': '2020-09-10', 'id': '5f590331c1c56168a4cfe96b', 'status': 'Not Started', 'title': 'Fix Alicia book again'}, {'dateLastActivity': '2020-09-09', 'id': '5f58c9c64f6452685d239aaa', 'status': 'Not Started', 'title': 'Go for daily walks'}]
     return items
 
 def test_viewmodel_items(trello_items):
@@ -54,13 +54,13 @@ def test_viewmodel_contains_alldoneitems(trello_items):
 def test_viewmodel_contains_olddoneitems(trello_items):    
     todaydate=datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')   
     item_view_model = ViewModel(trello_items)   
-    date_list = [datetime.strptime(sub['dateLastActivity'],'%d-%m-%Y') for sub in item_view_model.older_done_items]     
+    date_list = [datetime.strptime((sub['dateLastActivity']).split(' ')[0],'%Y-%m-%d') for sub in item_view_model.older_done_items]     
     assert all(p <todaydate for p in date_list) and len(date_list)>0
 
 def test_viewmodel_contains_recentdoneitems(trello_items):   
     todaydate=datetime.strptime(datetime.today().strftime('%d-%m-%Y'),'%d-%m-%Y')     
     item_view_model = ViewModel(trello_items) 
-    date_list = [datetime.strptime(sub['dateLastActivity'],'%d-%m-%Y') for sub in item_view_model.recent_done_items]     
+    date_list = [datetime.strptime((sub['dateLastActivity']).split(' ')[0],'%Y-%m-%d') for sub in item_view_model.recent_done_items]     
     assert all(p ==todaydate for p in date_list) #and len(date_list)>0
 
 
