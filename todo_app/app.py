@@ -4,12 +4,13 @@ import todo_app.data.session_items as session
 import requests
 import os
 
+
 def create_app():
     app = Flask(__name__)
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))    
     #app.config.from_object(Config)
     # All the routes and setup code etc
-
+    
     @app.route('/')
     def index():             
         items = session.get_items()

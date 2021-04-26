@@ -6,9 +6,13 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 
-client = MongoClient(os.getenv('MONGODB_CONNECTIONSTRING'))
-db = client.PythonTodoDB
 
+
+def OpenMongo():
+    client = MongoClient(os.getenv('MONGODB_CONNECTIONSTRING'))
+    return client.PythonTodoDB
+
+db = OpenMongo()
 class CustomError(Exception):
     def __init__(self, *args):
         if args:
