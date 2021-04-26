@@ -11,7 +11,7 @@ before_install:
 script:
 - docker build --target test --tag todo-app:test .
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
-- docker run --env MONGODB_CONNECTIONSTRING="$MONGODB_CONNECTIONSTRING" --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
+- docker run --env MONGODB_CONNECTIONSTRING="$MONGODB" --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 
 before_deploy:
 - docker build --target production --tag todo-app:prod .
