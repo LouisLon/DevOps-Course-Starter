@@ -117,4 +117,4 @@ $ docker push registry.heroku.com/trelloappex8/web
 $ heroku container:release web -a trelloappex8 
 ```
 ## migration from trello API to MongoDB
-Update .env environment variable [MONGODB_CONNECTIONSTRING] to the MongoDb connection string
+Update .env environment variable [MONGODB_USERNAME] ,[MONGODB_USERNAME],[MONGODB_USERNAME] for the MongoDb connection

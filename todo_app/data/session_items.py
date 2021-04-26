@@ -6,10 +6,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 
-
-
 def OpenMongo():
-    client = MongoClient(os.getenv('MONGODB_CONNECTIONSTRING'))
+    client = MongoClient("mongodb+srv://"+os.getenv('MONGODB_USERNAME')+":"+os.getenv('MONGODB_PASSWORD')+"@cluster0.jish9.mongodb.net/"+os.getenv('MONGODB_DB')+"?retryWrites=true&w=majority")
     return client.PythonTodoDB
 
 db = OpenMongo()
