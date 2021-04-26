@@ -7,8 +7,11 @@ from bson.objectid import ObjectId
 
 
 def OpenMongo():
-    client = MongoClient("mongodb+srv://"+os.getenv('MONGODB_USERNAME')+":"+os.getenv('MONGODB_PASSWORD')+"@cluster0.jish9.mongodb.net/"+os.getenv('MONGODB_DB')+"?retryWrites=true&w=majority")
-    return client.PythonTodoDB
+    if(os.getenv('MONGODB_USERNAME', default = None)==None):
+        client = MongoClient("mongodb+srv://"+os.getenv('MONGODB_USERNAME')+":"+os.getenv('MONGODB_PASSWORD')+"@cluster0.jish9.mongodb.net/"+os.getenv('MONGODB_DB')+"?retryWrites=true&w=majority")
+        return client.PythonTodoDB
+    else:
+        return None
 
 db = OpenMongo()
 class CustomError(Exception):
