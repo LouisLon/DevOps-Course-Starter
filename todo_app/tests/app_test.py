@@ -80,5 +80,5 @@ def client():
         yield client
     
    
-def test_index_page(client):     
-    assert 'Book my holiday' in client.get('/').data.decode("utf-8") 
+# def test_index_page(client):     
+#     assert 'Book my holiday' in client.get('/').data.decode("utf-8") 
