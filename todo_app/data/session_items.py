@@ -5,15 +5,17 @@ from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-
+db=None
 def OpenMongo():
-    if(os.getenv('MONGODB_USERNAME', default = None)!=None):
-        client = MongoClient("mongodb+srv://"+os.getenv('MONGODB_USERNAME')+":"+os.getenv('MONGODB_PASSWORD')+"@cluster0.jish9.mongodb.net/"+os.getenv('MONGODB_DB')+"?retryWrites=true&w=majority")
-        return client.PythonTodoDB
-    else:
-        return None
+    global db
+    if(db==None):
+        if(os.getenv('MONGO_USERNAME', default = None)!=None):
+            client = MongoClient("mongodb+srv://"+os.getenv('MONGO_USERNAME')+":"+os.getenv('MONGO_PASSWORD')+"@"+os.getenv('MONGO_URL')+"/"+os.getenv('MONGO_DB')+"?retryWrites=true&w=majority")
+            db=client[os.getenv('MONGO_DB')]
+            return db
+        else:
+            return None
 
-db = OpenMongo()
 class CustomError(Exception):
     def __init__(self, *args):
         if args:
@@ -96,9 +98,13 @@ def get_items():
     return sorted_default_items
 
 def get_board_details():
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     result=db.list_collection_names()
-    if(result==None):
-        boards_name = {"name": "todo items","date": datetime.datetime.utcnow()}
+    if(len(result)==0):
+        boards_name = {"name": "todo items","date": datetime.utcnow()}
         boardscol = db["boards"]
         post_id = boardscol.insert_one(boards_name).inserted_id
         return {
@@ -127,12 +133,16 @@ def get_board_details():
    
     
 def get_listinboard(board_id):
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     board_lists = []   
     result=db.list_collection_names()
-    if(result==None):
+    if(len(result)==0):
         list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
         listscol = db["lists"]
-        post_id = listscol.insert_one(list_name).inserted_id
+        post_ids = listscol.insert_many(list_name).inserted_ids
         for json_item in list_name:
             board_lists.append({
             "id": str(ObjectId(json_item['_id'])),
@@ -152,7 +162,7 @@ def get_listinboard(board_id):
 
     list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
     listscol = db["lists"]
-    post_id = listscol.insert_many(list_name).inserted_ids
+    post_ids = listscol.insert_many(list_name).inserted_ids
     for json_item in list_name:
         board_lists.append({
         "id": str(ObjectId(json_item['_id'])),
@@ -160,12 +170,16 @@ def get_listinboard(board_id):
         })
     return board_lists
 
-    if(post_id==None):        
+    if(post_ids==None):        
         raise CustomError('Error finding a Trello board')
 
 def get_cardsinboard(board_id,active_status_id,doing_status_id,complete_status_id):
     card_lists = []    
     card_list = {}  
+
+    global db
+    if(db==None):
+        db=OpenMongo()
 
     for json_item in db.cards.find({"idBoard": board_id}):        
         card_list["id"] = str(ObjectId(json_item['_id']))
@@ -249,6 +263,10 @@ def save_item(item):
         item: The item to save.
     """
 
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     idlist=item["complete_list_id"]
     if(item['status'] == "Not Started"):
         idlist=item["active_list_id"]
@@ -276,6 +294,11 @@ def remove_item(id):
     Args:
         item: The item id to remove.
     """
+
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     deleteitem =  {"_id": ObjectId(id)} 
     results=db.cards.delete_one(deleteitem)
    
@@ -288,6 +311,10 @@ def sort_items(list_items):
     return list_items
 
 def create_trello_board():
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     board = {        
         "name": "To Services",
         "date": datetime.utcnow()}
@@ -300,6 +327,10 @@ def create_trello_board():
 
 
 def delete_trello_board(board_id):
+    global db
+    if(db==None):
+        db=OpenMongo()
+
     deleteboard =  {"_id": ObjectId(board_id)} 
     results=db.boards.delete_one(deleteboard)   
     return (results.deleted_count>0)

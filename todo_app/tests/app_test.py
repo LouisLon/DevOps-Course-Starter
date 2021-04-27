@@ -3,8 +3,8 @@ import todo_app.app as app
 from todo_app.data.session_items import ViewModel
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
-import requests_mock
-import requests
+import mongomock
+import todo_app.data.session_items as session_testitems
 
 
 @pytest.fixture
@@ -78,7 +78,12 @@ def client():
     # Use the app to create a test_client that can be used in our tests.
     with test_app.test_client() as client:        
         yield client
+
+def test_index_page(client,monkeypatch,):         
+      
+    def mock_getdb():        
+        mockdb=mongomock.MongoClient().db       
+        return mockdb
     
-   
-# def test_index_page(client):     
-#     assert 'Book my holiday' in client.get('/').data.decode("utf-8") 
+    monkeypatch.setattr(session_testitems, 'OpenMongo', mock_getdb) 
+    assert 'Todays Completed Items' in client.get('/').data.decode("utf-8") 
