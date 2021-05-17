@@ -81,9 +81,10 @@ def client():
 
 def test_index_page(client,monkeypatch,):         
       
-    def mock_getdb():        
+    def mock_getdb(self):        
         mockdb=mongomock.MongoClient().db       
-        return mockdb
+        #return mockdb
+        self._db=mockdb
     
-    monkeypatch.setattr(session_testitems, 'OpenMongo', mock_getdb) 
+    monkeypatch.setattr(session_testitems.Boards, '__init__', mock_getdb) 
     assert 'Todays Completed Items' in client.get('/').data.decode("utf-8") 

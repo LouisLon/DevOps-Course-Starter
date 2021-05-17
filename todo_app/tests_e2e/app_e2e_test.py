@@ -13,7 +13,7 @@ def test_app():
 # Create the new board & update the board id environment variable    
     file_path = find_dotenv('.env')
     load_dotenv(file_path)    
-    board_id = session.create_trello_board()
+    board_id = session.Boards().create_trello_board()
     os.environ['TRELLO_BOARD_ID'] = board_id
     # construct the new application
     application = app.create_app()
@@ -83,6 +83,6 @@ def test_delete_item(driver,test_app):
     remove_link.click()
     driver.refresh()
     assert len(driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]'))==0
-    session.delete_trello_board(os.environ['TRELLO_BOARD_ID'])
+    session.Boards().delete_trello_board(os.environ['TRELLO_BOARD_ID'])
    
    
