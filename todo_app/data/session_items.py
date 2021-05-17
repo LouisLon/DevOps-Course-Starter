@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 db=None
-def OpenMongo():
+def open_mongo():
     global db
     if(db==None):
         if(os.getenv('MONGO_USERNAME', default = None)!=None):
@@ -100,46 +100,35 @@ def get_items():
 def get_board_details():
     global db
     if(db==None):
-        db=OpenMongo()
-
-    result=db.list_collection_names()
-    if(len(result)==0):
+        db=open_mongo()
+    
+    if(db['boards'].count_documents({}) == 0):
         boards_name = {"name": "todo items","date": datetime.utcnow()}
         boardscol = db["boards"]
         post_id = boardscol.insert_one(boards_name).inserted_id
+        if(post_id==None):        
+            raise CustomError('Error creating todo items board')
+        else:
+            return {
+            "id": str(ObjectId(post_id)),
+            "name": "todo items",
+            }
+    else:        
+        document=db.boards.find_one({"name": "todo items"})
         return {
-        "id": str(ObjectId(post_id)),
-        "name": "todo items",
+        "id": str(ObjectId(document['_id'])),
+        "name": document["name"],
         }
-    else:
-        for coll in result:
-            if(coll=="boards"):
-                document=db.boards.find_one({"name": "todo items"})
-                return {
-                "id": str(ObjectId(document['_id'])),
-                "name": document["name"],
-                }
             
-    boards = {"name": "todo items","date": datetime.utcnow()}
-    boardscol = db["boards"]
-    post_id = boardscol.insert_one(boards).inserted_id
-    return {
-    "id": str(ObjectId(post_id)),
-    "name": "todo items",
-    }
-
-    if(post_id==None):        
-        raise CustomError('Error finding a Trello board')
-   
-    
+        
 def get_listinboard(board_id):
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     board_lists = []   
-    result=db.list_collection_names()
-    if(len(result)==0):
+        
+    if(db['lists'].count_documents({}) == 0):
         list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
         listscol = db["lists"]
         post_ids = listscol.insert_many(list_name).inserted_ids
@@ -149,53 +138,39 @@ def get_listinboard(board_id):
             "name": json_item["name"],
             })
         return board_lists       
-    else:
-        for coll in result:
-            if(coll=="lists"):
-                document=db.lists.find()
-                for json_item in document:
-                    board_lists.append({
-                    "id": str(ObjectId(json_item['_id'])),
-                    "name": json_item["name"],
-                    })
-                return board_lists
-
-    list_name = [{'closed': False, 'idBoard': board_id, 'name': 'Things To Do', 'pos': 1}, {'closed': False, 'idBoard': board_id, 'name': 'Doing', 'pos': 2}, {'closed': False, 'idBoard': board_id, 'name': 'Done', 'pos': 3}]
-    listscol = db["lists"]
-    post_ids = listscol.insert_many(list_name).inserted_ids
-    for json_item in list_name:
-        board_lists.append({
-        "id": str(ObjectId(json_item['_id'])),
-        "name": json_item["name"],
-        })
-    return board_lists
-
-    if(post_ids==None):        
-        raise CustomError('Error finding a Trello board')
+    else:         
+        document=db.lists.find()
+        for json_item in document:
+            board_lists.append({
+            "id": str(ObjectId(json_item['_id'])),
+            "name": json_item["name"],
+            })
+        return board_lists   
+   
 
 def get_cardsinboard(board_id,active_status_id,doing_status_id,complete_status_id):
     card_lists = []    
-    card_list = {}  
+    card_dict = {}  
 
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     for json_item in db.cards.find({"idBoard": board_id}):        
-        card_list["id"] = str(ObjectId(json_item['_id']))
-        card_list["title"]  = json_item['name']
-        card_list["dateLastActivity"]  = str(json_item['dateLastActivity'])
-        card_list["active_list_id"]  = active_status_id
-        card_list["doing_list_id"]  = doing_status_id
-        card_list["complete_list_id"]  = complete_status_id
+        card_dict["id"] = str(ObjectId(json_item['_id']))
+        card_dict["title"]  = json_item['name']
+        card_dict["dateLastActivity"]  = str(json_item['dateLastActivity'])
+        card_dict["active_list_id"]  = active_status_id
+        card_dict["doing_list_id"]  = doing_status_id
+        card_dict["complete_list_id"]  = complete_status_id
 
         if(active_status_id==json_item['idList']):
-            card_list["status"]  = 'Not Started'
+            card_dict["status"]  = 'Not Started'
         elif (doing_status_id==json_item['idList']):
-            card_list["status"]  = 'Doing'
+            card_dict["status"]  = 'Doing'
         else:
-            card_list["status"]  = 'Done'
-        card_lists.append(card_list.copy())  
+            card_dict["status"]  = 'Done'
+        card_lists.append(card_dict.copy())  
 
     return card_lists
 
@@ -246,7 +221,7 @@ def add_item(title):
     card_id = db.cards.insert_one(card).inserted_id
     
     if card_id==None:             
-        raise CustomError('Error finding deleting Trello card '+title)
+        raise CustomError('Error inserting card '+title)
 
     items = get_items()
    
@@ -257,15 +232,15 @@ def add_item(title):
 
 def save_item(item):
     """
-    Updates an existing item in the session. If no existing item matches the ID of the specified item, nothing is saved.
+    Updates an existing item in the database. If no existing item matches the ID of the specified item, An error is raised.
     
     Args:
-        item: The item to save.
+        item: The item to update.
     """
 
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     idlist=item["complete_list_id"]
     if(item['status'] == "Not Started"):
@@ -283,8 +258,7 @@ def save_item(item):
   
     existing_items = get_items()    
     updated_items = [item if item['id'] == existing_item['id'] else existing_item for existing_item in existing_items]    
-    #session['items'] = sort_items(updated_items)
-
+   
     return item
 
 def remove_item(id):
@@ -297,7 +271,7 @@ def remove_item(id):
 
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     deleteitem =  {"_id": ObjectId(id)} 
     results=db.cards.delete_one(deleteitem)
@@ -313,7 +287,7 @@ def sort_items(list_items):
 def create_trello_board():
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     board = {        
         "name": "To Services",
@@ -322,14 +296,14 @@ def create_trello_board():
     board_id = db.boards.insert_one(board).inserted_id
      
     if (board_id==None):          
-        raise CustomError('Error finding creating board "To Service" - '+str(response.status_code)+' - '+response.text)
+        raise CustomError('Error finding creating board "To Service"')
     return str(ObjectId(board_id))
 
 
 def delete_trello_board(board_id):
     global db
     if(db==None):
-        db=OpenMongo()
+        db=open_mongo()
 
     deleteboard =  {"_id": ObjectId(board_id)} 
     results=db.boards.delete_one(deleteboard)   
