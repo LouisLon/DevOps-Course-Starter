@@ -112,7 +112,10 @@ $ docker push louiseg/todo-app
 $ heroku login
 $ heroku container:login
 $ docker pull louiseg/todo-app:latest
-$ docker tag louiseg/todo-app:latest registry.heroku.com/trelloappex8/web
-$ docker push registry.heroku.com/trelloappex8/web
-$ heroku container:release web -a trelloappex8 
+$ docker tag louiseg/todo-app:latest registry.heroku.com/mongoappex10/web
+$ docker push registry.heroku.com/mongoappex10/web
+$ heroku container:release web -a mongoappex10 
 ```
+## migration from trello API to MongoDB
+Update environment variable [MONGO_USERNAME] ,[MONGO_PASSWORD],[MONGO_DB],[MONGO_URL] for the MongoDb connection in the .env file
+These parameter should be included for Heroku and Travis-CI environment variables

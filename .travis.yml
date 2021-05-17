@@ -11,7 +11,7 @@ before_install:
 script:
 - docker build --target test --tag todo-app:test .
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
-- docker run --env TRELLO_KEY=$TRELLO_KEY --env TRELLO_TOKEN=$TRELLO_TOKEN --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
+- docker run --env MONGO_USERNAME=$MONGO_USERNAME --env MONGO_PASSWORD=$MONGO_PASSWORD --env MONGO_DB=$MONGO_DB --env MONGO_URL=$MONGO_URL --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 
 before_deploy:
 - docker build --target production --tag todo-app:prod .
@@ -24,6 +24,7 @@ deploy:
   script:   
       docker push "$DOCKER_USERNAME"/todo-app;      
       docker push registry.heroku.com/$HEROKU_APP/web; 
-      heroku container:release web --app $HEROKU_APP; 
+      heroku container:release web --app $HEROKU_APP;
   on:
-    branch: master
+      branch: master
+ 
