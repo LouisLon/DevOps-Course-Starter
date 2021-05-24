@@ -10,20 +10,17 @@ from todo_app.data.user import User,ROLES,requires_roles
 from flask import session as appsession
 
 
-def create_app(isTest=False):
-    app = Flask(__name__)       
+def create_app():
+    app = Flask(__name__)      
     CLIENT_ID = os.environ.get("CLIENT_ID", None)
     CLIENT_SECRET = os.environ.get("CLIENT_SECRET", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", None)
-    WRITER_ROLE = os.environ.get("ROLEWRITER_USER", None)    
+    WRITER_ROLE = os.environ.get("ROLEWRITER_USER", None)  
+    app.secret_key = SECRET_KEY   
     client = WebApplicationClient(CLIENT_ID)
     login_manager = LoginManager()
     login_manager.init_app(app)
-    app.secret_key = SECRET_KEY
-    if isTest:
-        app.config['LOGIN_DISABLED'] = True
-
-  
+          
     @login_manager.unauthorized_handler
     def unauthenticated():        
         identity_url=client.prepare_request_uri('https://github.com/login/oauth/authorize')      
@@ -85,8 +82,14 @@ def create_app(isTest=False):
     @requires_roles('reader','writer')
     def index():             
         items = session.Boards().get_items()
-        item_view_model = session.ViewModel(items)                
-        return render_template('index.html',view_model=item_view_model,isWriter=(appsession.get('roles')==ROLES['writer']),currentuser=current_user.username)
+        item_view_model = session.ViewModel(items)  
+        if current_user.is_anonymous:
+            mcurrent_user=''  
+            misWriter=True #for E2E testing
+        else:
+            mcurrent_user=current_user.username  
+            misWriter=(appsession.get('roles')==ROLES['writer'])     
+        return render_template('index.html',view_model=item_view_model,isWriter=misWriter,currentuser=mcurrent_user)
                    
 
     @app.route('/', methods=['POST'])

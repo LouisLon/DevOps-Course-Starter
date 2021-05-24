@@ -17,10 +17,11 @@ def test_app():
     os.environ['TRELLO_BOARD_ID'] = board_id
     # construct the new application
     application = app.create_app()
+    application.config['LOGIN_DISABLED'] = True   
     # start the app in its own thread.
     thread = Thread(target=lambda: application.run(use_reloader=False))
     thread.daemon = True
-    thread.start()
+    thread.start()      
     yield app
     # Tear Down
     thread.join(1)
@@ -36,7 +37,7 @@ def driver():
         yield driver
 
 def test_task_journey(driver, test_app):
-    driver.get('http://localhost:5000/')    
+    driver.get('http://localhost:5000/')     
     assert driver.title == 'To-Do App'
 
 def test_add_item(driver,test_app):
