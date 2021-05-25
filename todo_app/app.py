@@ -12,8 +12,8 @@ from flask import session as appsession
 
 def create_app():
     app = Flask(__name__)      
-    CLIENT_ID = os.environ.get("CLIENT_ID", None)
-    CLIENT_SECRET = os.environ.get("CLIENT_SECRET", None)
+    CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", None)
+    CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", None)
     WRITER_ROLE = os.environ.get("ROLEWRITER_USER", None)  
     app.secret_key = SECRET_KEY   

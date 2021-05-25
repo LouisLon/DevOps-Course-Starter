@@ -122,5 +122,6 @@ These parameter should be included for Heroku and Travis-CI environment variable
 
 ## GitHub Authentication and roles authorisation
 The application requires the Github client-id and client-secret to set as environment variables -
-[CLIENT_ID] [CLIENT_SECRET]
+[GITHUB_CLIENT_ID] ,[GITHUB_CLIENT_SECRET]
 To give a user the writer role an environment variable [ROLEWRITER_USER] should be created with the users GitHub username.
+These environment variables need to be included in Heroku setting for heroku setup.
