@@ -16,6 +16,7 @@ def create_app():
     CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", None)
     SECRET_KEY = os.environ.get("SECRET_KEY", None)
     WRITER_ROLE = os.environ.get("ROLEWRITER_USER", None)  
+    redirect_uri=os.environ.get("GITHUB_REDIRECT_URI", None)
     app.secret_key = SECRET_KEY   
     client = WebApplicationClient(CLIENT_ID)
     login_manager = LoginManager()
@@ -23,7 +24,7 @@ def create_app():
           
     @login_manager.unauthorized_handler
     def unauthenticated():        
-        identity_url=client.prepare_request_uri('https://github.com/login/oauth/authorize')      
+        identity_url=client.prepare_request_uri('https://github.com/login/oauth/authorize',redirect_uri)      
         return redirect(identity_url)
 
     @app.route("/login/callback")
