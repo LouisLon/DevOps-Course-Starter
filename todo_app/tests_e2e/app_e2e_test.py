@@ -73,7 +73,7 @@ def test_incomplete_item(driver,test_app):
     incomplete_link.click()
     driver.refresh()    
     driver.find_element(By.XPATH, '//summary[contains(text(),"ToDo Items")]/..').click() 
-    assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Not Started DoneStart Item'
+    assert driver.find_elements(By.XPATH, '//li[contains(text(), "selenium created new item")]')[0].text=='selenium created new item - Not Started Done Start Item'
 
 
 def test_delete_item(driver,test_app):
