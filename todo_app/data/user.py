@@ -1,5 +1,6 @@
 from flask_login import UserMixin, current_user
 from functools import wraps
+from flask import current_app
 
 ROLES = {
     'reader': 'reader',
@@ -23,8 +24,8 @@ class User(UserMixin):
 def requires_roles(*roles):    
     def wrapper(f):
         @wraps(f)
-        def wrapped(*args, **kwargs):
-            if type(current_user).__name__!='LocalProxy':
+        def wrapped(*args, **kwargs):           
+            if current_app.config.get('LOGIN_DISABLED') == False:
                 if current_user.role not in roles:
                     # Redirect the user to an unauthorized notice!
                     return "You are not authorized to access this page"

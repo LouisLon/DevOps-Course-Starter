@@ -17,11 +17,12 @@ def create_app():
     SECRET_KEY = os.environ.get("SECRET_KEY", None)
     WRITER_ROLE = os.environ.get("ROLEWRITER_USER", None)  
     redirect_uri=os.environ.get("GITHUB_REDIRECT_URI", None)
-    app.secret_key = SECRET_KEY   
+    app.secret_key = SECRET_KEY       
     client = WebApplicationClient(CLIENT_ID)
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-          
+    login_manager = LoginManager()    
+    login_manager.init_app(app)   
+
+
     @login_manager.unauthorized_handler
     def unauthenticated():        
         identity_url=client.prepare_request_uri('https://github.com/login/oauth/authorize',redirect_uri)      
@@ -84,7 +85,8 @@ def create_app():
     def index():             
         items = session.Boards().get_items()
         item_view_model = session.ViewModel(items)  
-        if current_user.is_anonymous:
+        
+        if app.config.get("LOGIN_DISABLED",False):
             mcurrent_user=''  
             misWriter=True #for E2E testing
         else:
@@ -149,7 +151,3 @@ def create_app():
 
 if __name__ == '__main__':
     create_app().run(debug=True,host='0.0.0.0',port=port)
-    
-
-
-
