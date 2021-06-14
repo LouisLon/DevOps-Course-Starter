@@ -17,11 +17,20 @@
       
       <ul class="list-group mb-6">
         <!-- List the todo items here -->
+       
         {% for item in view_model.todoitems %}
         <li class="list-group-item">      
-          {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="/{{ item.id }}" class="btn btn-success btn-sm m-1" role="button" aria-pressed="true">Done</a><a href="{{url_for('start_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">Start Item</a>
+          {{item.title}} - {{item.status}} 
+          {% if isWriter==True: %}
+            <a href="{{url_for('delete_item', id=item.id)}}">
+              <i class="fas fa-trash-alt"></i>
+            </a>
+            <a href="/{{ item.id }}" class="btn btn-success btn-sm m-1" role="button" aria-pressed="true">Done</a>
+            <a href="{{url_for('start_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">Start Item</a>
+          {% endif%} 
         </li>       
         {% endfor %}
+        
       </ul>
       </details>
       <br>
@@ -31,7 +40,13 @@
         <!-- List the todo items here -->
         {% for item in view_model.doingitems %}
         <li class="list-group-item">       
-          {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="/{{ item.id }}" class="btn btn-success btn-sm m-1" role="button" aria-pressed="true">Done</a>
+          {{item.title}} - {{item.status}} 
+          {% if isWriter==True: %}
+          <a href="{{url_for('delete_item', id=item.id)}}">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+          <a href="/{{ item.id }}" class="btn btn-success btn-sm m-1" role="button" aria-pressed="true">Done</a>
+          {% endif%}
         </li>   
         {% endfor %}
         
@@ -42,7 +57,13 @@
       <ul class="list-group mb-6">        
         {%for item in view_model.recent_done_items %}        
         <li class="list-group-item">       
-           {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="{{url_for('uncomplete_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">To Do</a>
+           {{item.title}} - {{item.status}} 
+           {% if isWriter==True: %}
+           <a href="{{url_for('delete_item', id=item.id)}}">
+             <i class="fas fa-trash-alt"></i>
+           </a>
+           <a href="{{url_for('uncomplete_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">To Do</a>
+           {% endif%}
         </li>       
         {% endfor %}
         
@@ -56,7 +77,13 @@
         <summary>Older Completed Items</summary>
         {%for item in view_model.older_done_items %}        
         <li class="list-group-item">       
-           {{item.title}} - {{item.status}} <a href="{{url_for('delete_item', id=item.id)}}"><i class="fas fa-trash-alt"></i></a><a href="{{url_for('uncomplete_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">To Do</a>
+           {{item.title}} - {{item.status}} 
+           {% if isWriter==True: %}
+           <a href="{{url_for('delete_item', id=item.id)}}">
+             <i class="fas fa-trash-alt"></i>
+           </a>
+           <a href="{{url_for('uncomplete_item', id=item.id)}}" class="btn btn-primary btn-sm m-1" role="button" aria-pressed="true">To Do</a>
+           {% endif%}
         </li>       
         {% endfor %}
         
@@ -64,7 +91,7 @@
       </ul>
       </details>
     </div>
-    
+    {% if isWriter==True: %}
     <form action="/" method="post">
       <br>
       <div class="form-group">
@@ -72,6 +99,7 @@
     </div>
       <input type="submit" value="Add Item" name="add_item" class="btn btn-primary">
     </form>
+    {% endif%}
   </div>
 </div>
 {% endblock %}

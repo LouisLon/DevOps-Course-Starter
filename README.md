@@ -119,3 +119,11 @@ $ heroku container:release web -a mongoappex10
 ## migration from trello API to MongoDB
 Update environment variable [MONGO_USERNAME] ,[MONGO_PASSWORD],[MONGO_DB],[MONGO_URL] for the MongoDb connection in the .env file
 These parameter should be included for Heroku and Travis-CI environment variables
+
+## GitHub Authentication and roles authorisation
+The application requires the Github client-id and client-secret and redirect Url to set as environment variables -
+[GITHUB_CLIENT_ID] ,[GITHUB_CLIENT_SECRET],[GITHUB_REDIRECT_URI]
+To give a user the writer role an environment variable [ROLEWRITER_USER] should be created with the users GitHub username.
+These environment variables need to be included in Heroku setting for heroku setup.
+Also create the variable SECRET_KEY for the flask application
+Set the environment variable [OAUTHLIB_INSECURE_TRANSPORT]=1 to use HTTP (not recommended on production)
