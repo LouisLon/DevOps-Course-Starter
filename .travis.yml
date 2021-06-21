@@ -5,8 +5,6 @@ services:
 
 before_install:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- curl https://toolbelt.heroku.com/install.sh | sh  
-- echo "$HEROKU_API_KEY" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
 
 script:
 - docker build --target test --tag todo-app:test .
@@ -16,15 +14,13 @@ script:
 before_deploy:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-- docker tag todo-app:prod registry.heroku.com/$HEROKU_APP/web
 
 deploy:
 - provider: script 
   skip_cleanup: true 
   script:   
-      docker push "$DOCKER_USERNAME"/todo-app;      
-      docker push registry.heroku.com/$HEROKU_APP/web; 
-      heroku container:release web --app $HEROKU_APP;
+      docker push "$DOCKER_USERNAME"/todo-app;
+      curl -dH -X POST "$AZURE_DEPLOY_WEBHOOK"
   on:
     all_branches: true 
     #branch: master #   all_branches: true 
