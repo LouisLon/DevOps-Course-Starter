@@ -21,6 +21,5 @@ deploy:
   script:   
       docker push "$DOCKER_USERNAME"/todo-app;
       curl -dH -X POST "$AZURE_DEPLOY_WEBHOOK"
-  on:
-    all_branches: true 
-    #branch: master #   all_branches: true 
+  on:     
+    branch: master #   all_branches: true 
