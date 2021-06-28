@@ -16,8 +16,7 @@ before_deploy:
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
 
 deploy:
-- provider: script 
-  skip_cleanup: true 
-  script: deploy.sh
+- provider: script   
+  script: ./deploy.sh
   on:     
     branch: module_11 #master #   all_branches: true 
