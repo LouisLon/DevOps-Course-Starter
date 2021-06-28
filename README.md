@@ -83,7 +83,7 @@ For production, the trello key and token is required in the command below
 ```bash
 $ docker run --env TRELLO_KEY=[TRELLO_KEY] --env TRELLO_TOKEN=[TRELLO_TOKEN] --env TRELLO_BOARD_ID=[TRELLO_BOARD_ID] -d -p 127.0.0.1:5000:5000 todo-app:prod
 ```
-## For test
+## Docker Test Command
 To build the docker image, run the `test` build command
 ```bash
 $ docker build --target test --tag todo-app:test .
@@ -96,9 +96,9 @@ docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-
 docker run --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test todo_app/tests_e2e/
 ```
 ## To View the technical UML diagram
-load the file documentation\ToDo_UML.drawio from the site https://app.diagrams.net/
+load the file documentation\ToDo_UML.drawio file using the site https://app.diagrams.net/
 
-## Build in Travis and deploy to Heroku
+## Automatic Build and deploy to Heroku usint CI Travis
 https://travis-ci.com/github/LouisLon/DevOps-Course-Starter
 Build docker test image and run tests with the .travis.yml steps
 Build docker prod image and deploy to Heroku - https://trelloappex8.herokuapp.com/
@@ -116,14 +116,52 @@ $ docker tag louiseg/todo-app:latest registry.heroku.com/mongoappex10/web
 $ docker push registry.heroku.com/mongoappex10/web
 $ heroku container:release web -a mongoappex10 
 ```
-## migration from trello API to MongoDB
-Update environment variable [MONGO_USERNAME] ,[MONGO_PASSWORD],[MONGO_DB],[MONGO_URL] for the MongoDb connection in the .env file
+## migration from Trello API to the use MongoDB
+Create environment variables
+```
+[MONGO_USERNAME]
+[MONGO_PASSWORD]
+[MONGO_DB]
+[MONGO_URL]
+```
+for the MongoDb connection in the .env file or system environment variables
 These parameter should be included for Heroku and Travis-CI environment variables
 
-## GitHub Authentication and roles authorisation
-The application requires the Github client-id and client-secret and redirect Url to set as environment variables -
-[GITHUB_CLIENT_ID] ,[GITHUB_CLIENT_SECRET],[GITHUB_REDIRECT_URI]
-To give a user the writer role an environment variable [ROLEWRITER_USER] should be created with the users GitHub username.
-These environment variables need to be included in Heroku setting for heroku setup.
-Also create the variable SECRET_KEY for the flask application
+## GitHub OAuth Authentication and roles authorisation
+The application requires the Github client-id and client-secret and redirect Url to be created as environment variables -
+```
+[GITHUB_CLIENT_ID]
+[GITHUB_CLIENT_SECRET]
+[GITHUB_REDIRECT_URI]
+```
+To give a user the writer role (allowing CRUD) an environment variable 
+```
+[ROLEWRITER_USER]
+```
+should be created with the users GitHub username as the value.
+These environment variables also need to be included in Heroku setting for heroku setup.
+Also remeber to create the variable SECRET_KEY for the flask application
 Set the environment variable [OAUTHLIB_INSECURE_TRANSPORT]=1 to use HTTP (not recommended on production)
+
+## Hosting the application on Azure app service with CosmosDB database
+Create an Azure app Service
+Create an an Azure CosmosDB Database with Mongo API
+Update Travis-CI environment variables Settings to point to CosmosDB
+As we have used MongoDB and docker previously, the environment variables would need to be updated to
+point to an azure CosmosDB
+```
+[MONGO_USERNAME] = <cosmos_account_name>
+[MONGO_PASSWORD] = <primarymasterkey>
+[MONGO_DB] = <database_name>
+[MONGO_URL] = <cosmos_account_name>.mongo.cosmos.azure.com:10255
+[MONGO_OPTIONS] = ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000
+```
+Note also that the all the previous environment variables need to be added to the App service settings 
+Add the environment variable 
+```
+[AZURE_DEPLOY_WEBHOOK] = https://$<deployment_username>:<deployment_password>@<webapp_name>.scm.azurewebsites.net/docker/hook
+```
+in Travis-CI environment settings to enable Docker image Continuous Deployment.
+Note that you would need to enable continous deployment on azure app service deployment center where you can get the
+Webhook URL.
+

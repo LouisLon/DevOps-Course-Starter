@@ -61,7 +61,7 @@ class Boards:
     _db = None
     def __init__(self):               
         if(os.getenv('MONGO_USERNAME', default = None)!=None):
-            client = MongoClient("mongodb+srv://"+os.getenv('MONGO_USERNAME')+":"+os.getenv('MONGO_PASSWORD')+"@"+os.getenv('MONGO_URL')+"/"+os.getenv('MONGO_DB')+"?retryWrites=true&w=majority")
+            client = MongoClient("mongodb://"+os.getenv('MONGO_USERNAME')+":"+os.getenv('MONGO_PASSWORD')+"@"+os.getenv('MONGO_URL')+"/"+os.getenv('MONGO_DB')+"?"+os.getenv('MONGO_OPTIONS'))
             self._db=client[os.getenv('MONGO_DB')]
                
     
