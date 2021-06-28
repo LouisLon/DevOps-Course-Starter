@@ -20,4 +20,4 @@ deploy:
   skip_cleanup: true 
   script: bash scripts/deploy.sh
   on:     
-    branch: module_11 #master #   all_branches: true 
+    branch: master 
