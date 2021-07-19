@@ -165,3 +165,20 @@ in Travis-CI environment settings to enable Docker image Continuous Deployment.
 Note that you would need to enable continous deployment on azure app service deployment center where you can get the
 Webhook URL.
 
+## Using Terraform to migrate to azure
+ run ./scripts/createstorage_acct.sh
+ input your azure resource group
+ Add the storage account to main.tf
+ run terraform init
+ update main.tf with your resource group,storage account name,container_name on line 10 - 12
+ run terraform apply
+
+ d33b95c7-af3c-4247-9661-aa96d47fccc0
+
+ az account set --subscription="d33b95c7-af3c-4247-9661-aa96d47fccc0"
+
+ az ad sp create-for-rbac --name "travis_service_principal" --role Contributor --scopes /subscriptions/d33b95c7-af3c-4247-9661-aa96d47fccc0/resourceGroups/Capita1_LouisEgbufor_ProjectExercise
+
+ webapp_url = "https://todomodule12.azurewebsites.net"
+webhook = "https://$todomodule12:ggrgo7PMqngljq5gx8mreZD38d9ZNmjNEkwXkrdWCmjoNxn1C0ZkNc1S85Hd@todomodule12.scm.azurewebsites.net/docker/hook"
+
