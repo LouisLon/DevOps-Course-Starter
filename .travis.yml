@@ -21,7 +21,7 @@ script:
 before_deploy:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-- terraform apply -var 'GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID' -var 'GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET' -var 'GITHUB_REDIRECT_URI=GITHUB_REDIRECT_URI' -var 'SECRET_KEY=$SECRET_KEY' -var 'ROLEWRITER_USER=$ROLEWRITER_USER' -var 'webapp=$webapp' -var 'cosmosdb_account=$cosmosdb_account' -var 'cosmosdb=$cosmosdb' -var 'ARM_ACCESS_KEY=$ARM_ACCESS_KEY' -auto-approve
+- terraform apply -var 'GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID' -var 'GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET' -var 'GITHUB_REDIRECT_URI=GITHUB_REDIRECT_URI' -var 'SECRET_KEY=$SECRET_KEY' -var 'ROLEWRITER_USER=$ROLEWRITER_USER' -var 'webapp=$TF_VAR_webapp' -var 'cosmosdb_account=$TF_VAR_cosmosdb_account' -var 'cosmosdb=$TF_VAR_cosmosdb' -var 'ARM_ACCESS_KEY=$ARM_ACCESS_KEY' -auto-approve
 
 
 deploy:
