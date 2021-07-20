@@ -3,6 +3,7 @@ set -x
 echo "Running deployment script...push image to docker"
 docker push "$DOCKER_USERNAME"/todo-app;
 echo "Running deployment script...Azure docker pull request"
-curl -dH -X POST "$AZURE_DEPLOY_WEBHOOK"
+#curl -dH -X POST "$AZURE_DEPLOY_WEBHOOK"
+curl -dH -X POST "$(terraform output -raw webhook)"
 echo "Pushed deployment successfully"
 #exit 0

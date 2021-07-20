@@ -18,14 +18,10 @@ script:
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 - docker run --env GITHUB_REDIRECT_URI --env GITHUB_CLIENT_ID --env GITHUB_CLIENT_SECRET --env ROLEWRITER_USER --env MONGO_USERNAME --env MONGO_PASSWORD --env MONGO_DB --env MONGO_URL --env MONGO_OPTIONS --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 
-env:
-  - tf_apply_cli_options="-auto-approve -input=false"
-
 before_deploy:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
 - terraform apply -input=false -auto-approve
-
 
 deploy:
 - provider: script   
