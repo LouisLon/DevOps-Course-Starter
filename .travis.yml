@@ -18,10 +18,13 @@ script:
 - docker run --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests/
 - docker run --env GITHUB_REDIRECT_URI --env GITHUB_CLIENT_ID --env GITHUB_CLIENT_SECRET --env ROLEWRITER_USER --env MONGO_USERNAME --env MONGO_PASSWORD --env MONGO_DB --env MONGO_URL --env MONGO_OPTIONS --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:test  todo_app/tests_e2e/
 
+env:
+  - tf_apply_cli_options="-auto-approve -input=false"
+
 before_deploy:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
-- terraform apply -var 'TF_VAR_GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID' -var 'TF_VAR_GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET' -var 'TF_VAR_GITHUB_REDIRECT_URI=GITHUB_REDIRECT_URI' -var 'TF_VAR_SECRET_KEY=$SECRET_KEY' -var 'TF_VAR_ROLEWRITER_USER=$ROLEWRITER_USER' -var 'TF_VAR_webapp=$webapp' -var 'TF_VAR_cosmosdb_account=$cosmosdb_account' -var 'TF_VAR_cosmosdb=$cosmosdb' -var 'TF_VAR_ARM_ACCESS_KEY=$ARM_ACCESS_KEY' -auto-approve
+- terraform apply -input=false -auto-approve
 
 
 deploy:
