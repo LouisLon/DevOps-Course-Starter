@@ -42,6 +42,6 @@ variable "cosmosdb" {}
 variable "geo_location" {
     default = "UK South"   
 }
-variable "ARM_ACCESS_KEY" {}
+
    
 
