@@ -165,3 +165,30 @@ in Travis-CI environment settings to enable Docker image Continuous Deployment.
 Note that you would need to enable continous deployment on azure app service deployment center where you can get the
 Webhook URL.
 
+## Using Terraform to migrate the ToDo application to azure
+Login with Azure CLI
+Create an azure blob storage to store the terraform state by running
+     ./scripts/createstorage_acct.sh
+Run terraform init and terraform apply
+Create a service pricipal authentication
+```
+az ad sp create-for-rbac --name "<SERVICE PRINCIPAL NAME>" --role Contributor --scopes /subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP NAME>
+```
+Run Terraform apply and copy the webhook URL and update travis-CI AZURE_DEPLOY_WEBHOOK environment variable
+Update Travis-CI environment variables Settings with the terraform variables
+```
+TF_VAR_cosmosdb
+TF_VAR_cosmosdb_account
+TF_VAR_GITHUB_CLIENT_ID
+TF_VAR_GITHUB_CLIENT_SECRET
+TF_VAR_GITHUB_REDIRECT_URI
+TF_VAR_ROLEWRITER_USER
+TF_VAR_SECRET_KEY
+TF_VAR_webapp
+TF_VERSION=0.14.7
+ARM_CLIENT_ID, ARM_TENANT_ID,ARM_SUBSCRIPTION_ID and ARM_CLIENT_SECRET
+```
+Push you changes and wait for travis to finish
+Load the azure application URL in the browser
+
+

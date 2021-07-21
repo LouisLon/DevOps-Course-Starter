@@ -3,6 +3,13 @@ language: python
 services:
 - docker
 
+install:
+- wget https://releases.hashicorp.com/terraform/"$TF_VERSION"/terraform_"$TF_VERSION"_linux_amd64.zip
+- unzip terraform_"$TF_VERSION"_linux_amd64.zip
+- sudo mv terraform /usr/local/bin/
+- rm terraform_"$TF_VERSION"_linux_amd64.zip
+- terraform init
+
 before_install:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
@@ -14,10 +21,11 @@ script:
 before_deploy:
 - docker build --target production --tag todo-app:prod .
 - docker tag todo-app:prod "$DOCKER_USERNAME"/todo-app:latest
+- terraform apply -input=false -auto-approve
 
 deploy:
 - provider: script   
   skip_cleanup: true 
   script: bash scripts/deploy.sh
   on:     
-    branch: master 
+    branch: module12 
